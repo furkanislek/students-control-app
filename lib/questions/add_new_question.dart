@@ -98,7 +98,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
         _informationController.text, _titleController.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Soru başarıyla yüklendi.")),
+      const SnackBar(content: Text("Soru başarıyla yüklendi.")),
     );
   }
 
