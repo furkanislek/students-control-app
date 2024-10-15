@@ -1,0 +1,194 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:image_picker/image_picker.dart';
+
+class AddNewQuestion extends StatefulWidget {
+  const AddNewQuestion({super.key});
+
+  @override
+  State<AddNewQuestion> createState() => _AddNewQuestionState();
+}
+
+class _AddNewQuestionState extends State<AddNewQuestion> {
+  final TextEditingController _categorySelectedController =
+      TextEditingController();
+  final TextEditingController _informationController = TextEditingController();
+  final TextEditingController _titleController = TextEditingController();
+  String? _base64Image;
+
+  Future<String?> pickAndCompressImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      File imageFile = File(image.path);
+      String? base64Image = await compressAndConvertToBase64(imageFile);
+      return base64Image;
+    }
+    return null;
+  }
+
+  Future<void> saveImageToFirestore(String? base64Image, String category,
+      String description, String title) async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final String uid = auth.currentUser!.uid;
+
+    try {
+      await FirebaseFirestore.instance.collection('questions').add({
+        'uid': uid,
+        'image': base64Image,
+        'category': category,
+        'description': description,
+        'title': title,
+        'timestamp': FieldValue.serverTimestamp(),
+        'dateTime': DateTime.now().millisecondsSinceEpoch
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<String?> compressAndConvertToBase64(File imageFile) async {
+    try {
+      final List<int>? compressedImage =
+          await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        quality: 50,
+      );
+
+      if (compressedImage == null) {
+        return null;
+      }
+
+      String base64Image = base64Encode(compressedImage);
+      return base64Image;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void uploadQuestionImage() async {
+    String? base64Image = await pickAndCompressImage();
+
+    if (base64Image != null) {
+      setState(() {
+        _base64Image = base64Image;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Görsel başarıyla yüklendi.")),
+      );
+    }
+  }
+
+  // Soru ve görseli Firestore'a kaydetme işlemi
+  void uploadQuestionToFirestore() async {
+    if (_base64Image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lütfen önce bir görsel yükleyin.")),
+      );
+      return;
+    }
+
+    await saveImageToFirestore(_base64Image, _categorySelectedController.text,
+        _informationController.text, _titleController.text);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Soru başarıyla yüklendi.")),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+          padding: const EdgeInsets.only(left: 30, right: 30, top: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset("assets/icons/info.svg", height: 300),
+              Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SizedBox(
+                      width: double.infinity,
+                      child: TextFormField(
+                        keyboardType: TextInputType.name,
+                        textInputAction: TextInputAction.next,
+                        controller: _categorySelectedController,
+                        decoration: InputDecoration(
+                          hintText: "-",
+                          prefixIcon: const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Icon(Icons.category_sharp),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25.0),
+                          ),
+                        ),
+                      ))),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _titleController,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    hintText: "-",
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Icon(Icons.title),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _informationController,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    hintText: "-",
+                    prefixIcon: const Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Icon(Icons.description),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                    onPressed: () {
+                      uploadQuestionImage();
+                    },
+                    child: const Text("Soru Görselini Yükle")),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                    onPressed: () {
+                      uploadQuestionToFirestore();
+                    },
+                    child: const Text("Soruyu Yükle")),
+              )
+            ],
+          )),
+    );
+  }
+}
