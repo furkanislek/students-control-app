@@ -26,9 +26,6 @@ class _AllQuestionsState extends State<AllQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Questions'),
-      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchAllQuestions(),
         builder: (context, snapshot) {

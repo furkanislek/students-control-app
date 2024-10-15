@@ -106,88 +106,90 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-          padding: const EdgeInsets.only(left: 30, right: 30, top: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SvgPicture.asset("assets/icons/info.svg", height: 300),
-              Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: SizedBox(
-                      width: double.infinity,
-                      child: TextFormField(
-                        keyboardType: TextInputType.name,
-                        textInputAction: TextInputAction.next,
-                        controller: _categorySelectedController,
-                        decoration: InputDecoration(
-                          hintText: "-",
-                          prefixIcon: const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Icon(Icons.category_sharp),
+          padding: const EdgeInsets.only(left: 30, right: 30),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset("assets/icons/info.svg", height: 300),
+                Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          keyboardType: TextInputType.name,
+                          textInputAction: TextInputAction.next,
+                          controller: _categorySelectedController,
+                          decoration: InputDecoration(
+                            hintText: "-",
+                            prefixIcon: const Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Icon(Icons.category_sharp),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25.0),
+                            ),
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                        ),
-                      ))),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: TextField(
-                  controller: _titleController,
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: "-",
-                    prefixIcon: const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Icon(Icons.title),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
+                        ))),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextField(
+                    controller: _titleController,
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                      hintText: "-",
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Icon(Icons.title),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: TextField(
-                  controller: _informationController,
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: "-",
-                    prefixIcon: const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Icon(Icons.description),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextField(
+                    controller: _informationController,
+                    textInputAction: TextInputAction.next,
+                    keyboardType: TextInputType.name,
+                    decoration: InputDecoration(
+                      hintText: "-",
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Icon(Icons.description),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                    onPressed: () {
-                      uploadQuestionImage();
-                    },
-                    child: const Text("Soru Görselini Yükle")),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                    onPressed: () {
-                      uploadQuestionToFirestore();
-                    },
-                    child: const Text("Soruyu Yükle")),
-              )
-            ],
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        uploadQuestionImage();
+                      },
+                      child: const Text("Soru Görselini Yükle")),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        uploadQuestionToFirestore();
+                      },
+                      child: const Text("Soruyu Yükle")),
+                )
+              ],
+            ),
           )),
     );
   }

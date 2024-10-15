@@ -89,28 +89,49 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       body: Padding(
-        padding: const EdgeInsets.only(left: 30, right: 30, top: 100),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 36),
-            SvgPicture.asset("assets/icons/login.svg", height: 300),
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: SizedBox(
+        padding: const EdgeInsets.only(left: 30, right: 30),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 36),
+              SvgPicture.asset("assets/icons/login.svg", height: 300),
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    textInputAction: TextInputAction.next,
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      hintText: "your@email.adress",
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Icon(Icons.person),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
                 width: double.infinity,
-                child: TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.next,
-                  controller: emailController,
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  textInputAction: TextInputAction.done,
+                  keyboardType: TextInputType.visiblePassword,
                   decoration: InputDecoration(
-                    hintText: "your@email.adress",
+                    hintText: "**********",
                     prefixIcon: const Padding(
                       padding: EdgeInsets.all(16),
-                      child: Icon(Icons.person),
+                      child: Icon(Icons.lock),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25.0),
@@ -118,71 +139,51 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: TextField(
-                controller: passwordController,
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                keyboardType: TextInputType.visiblePassword,
-                decoration: InputDecoration(
-                  hintText: "**********",
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Icon(Icons.lock),
+              if (errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Text(errorMessage!,
+                      style: const TextStyle(color: Colors.red)),
+                ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (isLogin) {
+                      signIn();
+                    } else {
+                      registerUser();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 226, 211, 245),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
+                  child: isLogin
+                      ? Text(
+                          "Login".toUpperCase(),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        )
+                      : Text(
+                          "Register".toUpperCase(),
+                          style: const TextStyle(fontWeight: FontWeight.w900),
+                        ),
                 ),
               ),
-            ),
-            if (errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(errorMessage!,
-                    style: const TextStyle(color: Colors.red)),
-              ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (isLogin) {
-                    signIn();
-                  } else {
-                    registerUser();
-                  }
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isLogin = !isLogin;
+                  });
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 226, 211, 245),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                ),
-                child: isLogin
-                    ? Text(
-                        "Login".toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      )
-                    : Text(
-                        "Register".toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
+                child: const Text("Henüz Hesabın Yok Mu ? Tıkla"),
               ),
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  isLogin = !isLogin;
-                });
-              },
-              child: const Text("Henüz Hesabın Yok Mu ? Tıkla"),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

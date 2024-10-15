@@ -47,8 +47,8 @@ class _HomeState extends State<Home> {
 
   // Alt menüdeki sayfalar
   static const List<Widget> _pages = <Widget>[
-    AddNewQuestion(),
     YourQuestions(),
+    AddNewQuestion(),
     AllQuestions(),
   ];
 
@@ -78,12 +78,12 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Add New Question',
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.question_answer),
             label: 'Your Questions',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box),
+            label: 'Add New Question',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
