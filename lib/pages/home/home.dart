@@ -21,9 +21,9 @@ class _HomeState extends State<Home> {
 
   // Başlıklar için liste
   static const List<String> _titles = [
-    'Add New Question',
-    'Your Questions',
-    'All Questions',
+    'Soru Ekle',
+    'Soruların',
+    'Tüm Sorular',
   ];
 
   @override
@@ -47,8 +47,8 @@ class _HomeState extends State<Home> {
 
   // Alt menüdeki sayfalar
   static const List<Widget> _pages = <Widget>[
-    YourQuestions(),
     AddNewQuestion(),
+    YourQuestions(),
     AllQuestions(),
   ];
 
@@ -78,16 +78,16 @@ class _HomeState extends State<Home> {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.question_answer),
-            label: 'Your Questions',
+            icon: Icon(Icons.add_box),
+            label: 'Soru Ekle',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_box),
-            label: 'Add New Question',
+            icon: Icon(Icons.question_answer),
+            label: 'Soruların',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.list),
-            label: 'All Questions',
+            label: 'Tüm Sorular',
           ),
         ],
         currentIndex: _selectedIndex,

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class AddNewQuestion extends StatefulWidget {
   const AddNewQuestion({super.key});
@@ -16,6 +17,17 @@ class AddNewQuestion extends StatefulWidget {
 }
 
 class _AddNewQuestionState extends State<AddNewQuestion> {
+  String? questionId; // Burada sadece tanımlıyoruz, sonra başlatacağız.
+
+  @override
+  void initState() {
+    super.initState();
+
+    // uuid örneğini initState içinde başlatıyoruz
+    var uuid = Uuid();
+    questionId = uuid.v4(); // Rastgele UUID oluşturuyoruz
+  }
+
   final TextEditingController _categorySelectedController =
       TextEditingController();
   final TextEditingController _informationController = TextEditingController();
@@ -37,6 +49,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
       String description, String title) async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final String uid = auth.currentUser!.uid;
+    var uuid = Uuid();
 
     try {
       await FirebaseFirestore.instance.collection('questions').add({
@@ -46,7 +59,8 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
         'description': description,
         'title': title,
         'timestamp': FieldValue.serverTimestamp(),
-        'dateTime': DateTime.now().millisecondsSinceEpoch
+        'dateTime': DateTime.now().millisecondsSinceEpoch,
+        "questionId": uuid.v4()
       });
     } catch (e) {
       print(e);
@@ -98,7 +112,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
         _informationController.text, _titleController.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Soru başarıyla yüklendi.")),
+      SnackBar(content: Text("Soru başarıyla yüklendi.")),
     );
   }
 
