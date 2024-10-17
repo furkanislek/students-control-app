@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:students_follow_app/services/auth.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewQuestion extends StatefulWidget {
@@ -17,7 +18,8 @@ class AddNewQuestion extends StatefulWidget {
 }
 
 class _AddNewQuestionState extends State<AddNewQuestion> {
-  String? questionId; // Burada sadece tanımlıyoruz, sonra başlatacağız.
+  String? questionId;
+  List<Map<String, dynamic>> _userInfo = [];
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
     var uuid = Uuid();
 
     try {
+      await _fetchUserInfo();
       await FirebaseFirestore.instance.collection('questions').add({
         'uid': uid,
         'image': base64Image,
@@ -60,11 +63,26 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
         'title': title,
         'timestamp': FieldValue.serverTimestamp(),
         'dateTime': DateTime.now().millisecondsSinceEpoch,
-        "questionId": uuid.v4()
+        "questionId": uuid.v4(),
+        "nickName": _userInfo[0]["nickName"]
       });
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> _fetchUserInfo() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('uid', isEqualTo: Auth().currentUser?.uid)
+        .get();
+
+    List<Map<String, dynamic>> userInfo =
+        snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+    setState(() {
+      _userInfo = userInfo;
+    });
   }
 
   Future<String?> compressAndConvertToBase64(File imageFile) async {

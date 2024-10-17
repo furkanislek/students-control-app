@@ -17,7 +17,7 @@ class _AllQuestionsState extends State<AllQuestions> {
   Future<List<Map<String, dynamic>>> _fetchAllQuestions() async {
     QuerySnapshot snapshot = await _firestore
         .collection('questions')
-        .orderBy('dateTime', descending: true) // En yeni sorular en üstte
+        .orderBy('dateTime', descending: true) 
         .get();
 
     return snapshot.docs
@@ -52,7 +52,6 @@ class _AllQuestionsState extends State<AllQuestions> {
 
               return GestureDetector(
                 onTap: () {
-                  // Soruya tıklandığında detay sayfasına yönlendirme
                   Navigator.push(
                     context,
                     MaterialPageRoute(

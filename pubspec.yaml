@@ -43,6 +43,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   uuid: ^4.5.1
   intl: ^0.19.0
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:

@@ -19,7 +19,6 @@ class _HomeState extends State<Home> {
   String? nickname;
   String? name;
 
-  // Başlıklar için liste
   static const List<String> _titles = [
     'Soru Ekle',
     'Soruların',

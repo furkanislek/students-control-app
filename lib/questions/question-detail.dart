@@ -48,22 +48,27 @@ class _QuestionDetailState extends State<QuestionDetail> {
     });
   }
 
-  Future<void> _markCorrectAnswer(String commentId) async {
+  Future<void> _markCorrectAnswer(String commentId, bool currentValue) async {
     try {
+      // Toggle the current value of isCorrectAnswer
+      bool newCorrectAnswerValue = !currentValue;
+
       await _firestore
           .collection('comments')
           .where('questionId', isEqualTo: widget.question['questionId'])
+          .where('commentId', isEqualTo: int.parse(commentId))
           .get()
           .then((QuerySnapshot querySnapshot) {
         querySnapshot.docs.forEach((doc) {
           String docId = doc.id;
 
-          // Belgeyi güncelle
           FirebaseFirestore.instance.collection('comments').doc(docId).update({
-            'isCorrectAnswer': true,
+            'isCorrectAnswer': newCorrectAnswerValue,
           });
         });
       });
+
+      _fetchComments();
     } catch (e) {
       print(e);
     }
@@ -208,81 +213,112 @@ class _QuestionDetailState extends State<QuestionDetail> {
         title: Text(widget.question['title'] ?? 'Question Detail'),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 13.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Category: ${widget.question['category'] ?? 'No Category'}',
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  Text(
+                    DateFormat('dd-MM-yyyy HH:mm').format(
+                        DateTime.fromMicrosecondsSinceEpoch(
+                            widget.question['dateTime'])),
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Category: ${widget.question['category'] ?? 'No Category'}',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                Text(
-                  DateFormat('dd-MM-yyyy HH:mm').format(
-                      DateTime.fromMicrosecondsSinceEpoch(
-                          widget.question['dateTime'])),
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                const SizedBox(height: 8),
+                widget.question['image'] != null
+                    ? Image.memory(
+                        Base64Decoder().convert(widget.question['image']),
+                        fit: BoxFit.fill,
+                        height: 220,
+                        width: double.infinity,
+                      )
+                    : const SizedBox(
+                        height: 100, child: Placeholder()), // Placeholder
+
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.question['title'] ?? 'No Title',
+                          textAlign: TextAlign.justify,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        widget.question['description'] ?? 'No Information',
+                        style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            widget.question['image'] != null
-                ? Image.memory(
-                    Base64Decoder().convert(widget.question['image']),
-                    fit: BoxFit.fill,
-                    height: 220,
-                    width: double.infinity,
-                  )
-                : const SizedBox(
-                    height: 100, child: Placeholder()), // Placeholder
-
-            const SizedBox(height: 8),
-            Text(
-              widget.question['title'] ?? 'No Title',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-            Text(
-              widget.question['description'] ?? 'No Information',
-              style: const TextStyle(fontSize: 16),
-            ),
-
             const SizedBox(height: 20),
-
-            ElevatedButton(
+            ElevatedButton.icon(
+              icon: const Icon(Icons.comment),
               onPressed: () {
                 setState(() {
                   _isCommenting = !_isCommenting;
                 });
               },
-              child:
-                  Text(_isCommenting ? 'Yorum Yapmayı İptal Et' : 'Yorum Yap'),
+              label:
+                  Text(_isCommenting ? 'Cevap yazmayı İptal Et' : 'Cevap Yaz',
+                  ),
             ),
-
             if (_isCommenting) ...[
               const SizedBox(height: 20),
               TextField(
                 controller: _commentController,
                 decoration: const InputDecoration(
                   labelText: 'Yorumunuzu yazın',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: Color.fromARGB(0, 8, 8, 70)),
+                  ),
                 ),
                 maxLines: 3,
               ),
               const SizedBox(height: 10),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton.icon(
                     onPressed: _pickImage,
                     icon: const Icon(Icons.image),
                     label: const Text('Resim Ekle'),
                   ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: _submitComment,
+                    icon: const Icon(Icons.send),
+                    label: const Text('Yorumu Gönder'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
                   const SizedBox(width: 10),
                   if (_selectedImage != null)
                     Image.file(
@@ -293,15 +329,10 @@ class _QuestionDetailState extends State<QuestionDetail> {
                     ),
                 ],
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _submitComment,
-                child: const Text('Yorumu Gönder'),
-              ),
             ],
-
             const SizedBox(height: 20),
             ListView.builder(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 0.0),
               itemCount: _comments.length,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -309,13 +340,28 @@ class _QuestionDetailState extends State<QuestionDetail> {
                 final comment = _comments[index];
                 final isQuestionOwner =
                     currentUserUid == widget.question['uid'];
+                final isCommentOwner =
+                    currentUserUid == comment["commentUserId"];
+                final isCorrectAnswer = comment['isCorrectAnswer'] == true;
 
                 return GestureDetector(
-                  onLongPress: isQuestionOwner
+                  onLongPress: isCommentOwner
                       ? () => _showDeleteConfirmationDialog(
                           context, comment["commentId"].toString())
                       : null,
                   child: Card(
+                    color: isCorrectAnswer
+                        ? Colors.green[50]
+                        : Colors.white, // Doğru cevapsa arka planı yeşil yap
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: isCorrectAnswer
+                            ? Colors.green
+                            : Colors.grey, // Doğru cevapsa kenarlığı yeşil yap
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 10, right: 10),
                       child: Column(
@@ -334,43 +380,71 @@ class _QuestionDetailState extends State<QuestionDetail> {
                             ),
                           ],
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              comment['comment'] ?? 'No Comment',
-                              style: const TextStyle(fontSize: 16),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                 Expanded(
+                                  // Wrap Text in Expanded to prevent overflow
+                                  child: Text(
+                                    comment['comment'] ?? 'No Comment',
+                                    textAlign: TextAlign
+                                        .justify, // Optional: Justify the text
+                                    style: const TextStyle(fontSize: 16),
+                                    overflow: TextOverflow
+                                        .ellipsis, // Add overflow handling
+                                    maxLines:
+                                        10, // Adjust maxLines as per your UI requirements
+                                  ),
+                                ),
+                                if (isQuestionOwner)
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.check_box,
+                                      color: isCorrectAnswer
+                                          ? const Color.fromARGB(255, 2, 153,
+                                              39) // Gold color if true
+                                          : const Color.fromARGB(255, 219, 217,
+                                              217), // Grey color if false
+                                    ),
+                                    onPressed: () {
+                                      _markCorrectAnswer(
+                                          comment['commentId'].toString(),
+                                          isCorrectAnswer);
+                                    },
+                                  ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 5),
                           Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              DateTime.fromMillisecondsSinceEpoch(
-                                      comment['dateTime'])
-                                  .toString(),
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5.0, horizontal: 12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                          comment['dateTime'])
+                                      .toString(),
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                                Text(
+                                  widget.question["nickName"],
+                                  style: const TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
                             ),
                           ),
-                          if (isQuestionOwner)
-                            IconButton(
-                              icon: Icon(
-                                Icons.star,
-                                color: comment['isCorrectAnswer'] == true
-                                    ? const Color.fromARGB(255, 190, 147, 15)
-                                    : Colors.grey,
-                              ),
-                              onPressed: () {
-                                _markCorrectAnswer(
-                                    comment['commentId'].toString());
-                              },
-                            ),
                         ],
                       ),
                     ),
                   ),
                 );
               },
-            ),
+            )
           ],
         ),
       ),

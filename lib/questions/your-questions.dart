@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:students_follow_app/questions/question-detail.dart';
 
 class YourQuestions extends StatefulWidget {
   const YourQuestions({super.key});
@@ -69,59 +70,73 @@ class _YourQuestionsState extends State<YourQuestions> {
             itemBuilder: (context, index) {
               final question = questions[index];
 
-              return Card(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      question['image'] != null
-                          ? Image.memory(
-                              const Base64Decoder().convert(question['image']),
-                              fit: BoxFit.cover,
-                            )
-                          : const SizedBox(
-                              height: 100, child: Placeholder()), // Placeholder
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuestionDetail(question: question),
+                    ),
+                  );
+                },
+                child: Card(
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        question['image'] != null
+                            ? Image.memory(
+                                const Base64Decoder()
+                                    .convert(question['image']),
+                                fit: BoxFit.cover,
+                                height: 220,
+                                width: double.infinity,
+                              )
+                            : const SizedBox(
+                                height: 100,
+                                child: Placeholder()), // Placeholder
 
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
 
-                      Text(
-                        question['title'] ?? 'No Title',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          question['title'] ?? 'No Title',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 4),
-                      Text(
-                        question['information'] ?? 'No Information',
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          question['description'] ?? 'No Information',
+                          style: const TextStyle(fontSize: 14),
+                        ),
 
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            question['category'] ?? 'No Category',
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
-                          ),
-                          Text(
-                            question['timestamp'] != null
-                                ? (question['timestamp'] as Timestamp)
-                                    .toDate()
-                                    .toString()
-                                : 'No Date',
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ],
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              question['category'] ?? 'No Category',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                            Text(
+                              question['timestamp'] != null
+                                  ? (question['timestamp'] as Timestamp)
+                                      .toDate()
+                                      .toString()
+                                  : 'No Date',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
