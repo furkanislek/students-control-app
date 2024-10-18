@@ -99,12 +99,21 @@ class _MenuState extends State<Menu> {
                   ? const CircularProgressIndicator() // Yükleniyor göstergesi
                   : Row(
                       children: [
-                        CircleAvatar(
-                          backgroundImage: profileImage != null
-                              ? MemoryImage(decodeBase64Image(
-                                  profileImage!)!) // Profil resmi varsa
-                              : const AssetImage("assets/icons/unknow.svg"), // Varsayılan resim
-                          radius: 40, // Çemberin yarıçapı
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const Profile()));
+                          },
+                          child: CircleAvatar(
+                            backgroundImage: profileImage != null
+                                ? MemoryImage(decodeBase64Image(
+                                    profileImage!)!) // Profil resmi varsa
+                                : const AssetImage(
+                                    "assets/icons/unknow.svg"), // Varsayılan resim
+                            radius: 40, // Çemberin yarıçapı
+                          ),
                         ),
                         const SizedBox(
                             width: 16), // Çember ile metin arasında boşluk

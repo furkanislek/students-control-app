@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
 import 'package:students_follow_app/pages/questions/question-detail.dart';
+import 'package:students_follow_app/utils/category-utils.dart';
 
 class YourQuestions extends StatefulWidget {
   const YourQuestions({super.key});
@@ -125,7 +126,7 @@ class _YourQuestionsState extends State<YourQuestions> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              question['category'] ?? 'No Category',
+                             getCategoryString(question['category']),
                               style: const TextStyle(
                                   fontSize: 12, color: Colors.grey),
                             ),
