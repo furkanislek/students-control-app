@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
 import 'package:students_follow_app/pages/questions/question-detail.dart';
+import 'package:students_follow_app/utils/category-utils.dart';
 
 class AllQuestions extends StatefulWidget {
   const AllQuestions({super.key});
@@ -103,7 +104,7 @@ class _AllQuestionsState extends State<AllQuestions> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              question['category'] ?? 'No Category',
+                              getCategoryString(question['category']),
                               style: const TextStyle(
                                   fontSize: 12, color: Colors.grey),
                             ),

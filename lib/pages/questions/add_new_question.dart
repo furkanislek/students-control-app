@@ -7,6 +7,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/questions/question-enum.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,18 +21,15 @@ class AddNewQuestion extends StatefulWidget {
 class _AddNewQuestionState extends State<AddNewQuestion> {
   String? questionId;
   List<Map<String, dynamic>> _userInfo = [];
+  QuestionCategory? _selectedCategory; // Store selected category
 
   @override
   void initState() {
     super.initState();
-
-    // uuid örneğini initState içinde başlatıyoruz
     var uuid = Uuid();
-    questionId = uuid.v4(); // Rastgele UUID oluşturuyoruz
+    questionId = uuid.v4(); // Create a random UUID
   }
 
-  final TextEditingController _categorySelectedController =
-      TextEditingController();
   final TextEditingController _informationController = TextEditingController();
   final TextEditingController _titleController = TextEditingController();
   String? _base64Image;
@@ -47,7 +45,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
     return null;
   }
 
-  Future<void> saveImageToFirestore(String? base64Image, String category,
+  Future<void> saveImageToFirestore(String? base64Image, int categoryId,
       String description, String title) async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final String uid = auth.currentUser!.uid;
@@ -58,7 +56,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
       await FirebaseFirestore.instance.collection('questions').add({
         'uid': uid,
         'image': base64Image,
-        'category': category,
+        'category': categoryId, // Use category ID here
         'description': description,
         'title': title,
         'timestamp': FieldValue.serverTimestamp(),
@@ -117,7 +115,6 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
     }
   }
 
-  // Soru ve görseli Firestore'a kaydetme işlemi
   void uploadQuestionToFirestore() async {
     if (_base64Image == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,8 +123,19 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
       return;
     }
 
-    await saveImageToFirestore(_base64Image, _categorySelectedController.text,
-        _informationController.text, _titleController.text);
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Lütfen bir kategori seçin.")),
+      );
+      return;
+    }
+
+    await saveImageToFirestore(
+      _base64Image,
+      _selectedCategory!.id, // Use the selected category ID
+      _informationController.text,
+      _titleController.text,
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Soru başarıyla yüklendi.")),
@@ -150,24 +158,31 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
               children: [
                 SvgPicture.asset("assets/icons/info.svg", height: 300),
                 Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: SizedBox(
-                        width: double.infinity,
-                        child: TextFormField(
-                          keyboardType: TextInputType.name,
-                          textInputAction: TextInputAction.next,
-                          controller: _categorySelectedController,
-                          decoration: InputDecoration(
-                            hintText: "-",
-                            prefixIcon: const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Icon(Icons.category_sharp),
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25.0),
-                            ),
-                          ),
-                        ))),
+                  padding: const EdgeInsets.only(top: 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: DropdownButtonFormField<QuestionCategory>(
+                      decoration: InputDecoration(
+                        hintText: "Kategori Seçin",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                      ),
+                      value: _selectedCategory,
+                      items: QuestionCategory.values.map((category) {
+                        return DropdownMenuItem<QuestionCategory>(
+                          value: category,
+                          child: Text(category.toString().split('.').last),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
@@ -223,7 +238,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
                         uploadQuestionToFirestore();
                       },
                       child: const Text("Soruyu Yükle")),
-                )
+                ),
               ],
             ),
           )),
