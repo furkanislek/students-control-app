@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:students_follow_app/questions/question-detail.dart';
+import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/questions/question-detail.dart';
 
 class YourQuestions extends StatefulWidget {
   const YourQuestions({super.key});
@@ -41,6 +42,10 @@ class _YourQuestionsState extends State<YourQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+       appBar: AppBar(
+        title: const Text("Soruların"),
+      ),
+      drawer: const Menu(),
       body: FutureBuilder<List<Map<String, dynamic>>?>(
         future: _fetchUserQuestions(),
         builder: (context, snapshot) {
