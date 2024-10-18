@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/questions/question-detail.dart';
+import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/questions/question-detail.dart';
 
 class AllQuestions extends StatefulWidget {
   const AllQuestions({super.key});
@@ -17,7 +18,7 @@ class _AllQuestionsState extends State<AllQuestions> {
   Future<List<Map<String, dynamic>>> _fetchAllQuestions() async {
     QuerySnapshot snapshot = await _firestore
         .collection('questions')
-        .orderBy('dateTime', descending: true) 
+        .orderBy('dateTime', descending: true)
         .get();
 
     return snapshot.docs
@@ -28,6 +29,10 @@ class _AllQuestionsState extends State<AllQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Tüm Sorular"),
+      ),
+      drawer: const Menu(),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchAllQuestions(),
         builder: (context, snapshot) {

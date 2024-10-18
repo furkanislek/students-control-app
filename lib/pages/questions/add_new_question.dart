@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:students_follow_app/components/menu/menu.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:uuid/uuid.dart';
 
@@ -137,6 +137,10 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Soru Ekle"),
+      ),
+      drawer: const Menu(),
       body: Padding(
           padding: const EdgeInsets.only(left: 30, right: 30),
           child: SingleChildScrollView(

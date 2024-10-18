@@ -1,10 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:students_follow_app/pages/auth/login_register_page.dart';
-import 'package:students_follow_app/services/auth.dart';
-import 'package:students_follow_app/pages/home/home.dart'; // Home sayfasını içe aktar
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:students_follow_app/pages/home/home.dart';
+import 'package:uuid/uuid.dart';
 
 class InformationForm extends StatefulWidget {
   const InformationForm({super.key});
@@ -19,55 +21,43 @@ class _InformationFormState extends State<InformationForm> {
   final TextEditingController _nickNameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
 
-  bool isLogin = true;
-  String? errorMessage;
   DateTime? selectedDate;
+  File? _image;
+  final ImagePicker _picker = ImagePicker();
+  String? _base64Image;
 
-  Future<void> signOut() async {
-    try {
-      await Auth().signOut();
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginRegisterPage()),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
       setState(() {
-        errorMessage = e.message;
+        _image = File(pickedFile.path);
       });
+      // Resmi base64'e dönüştür
+      _base64Image = await _compressAndConvertToBase64(_image!);
     }
   }
 
-  Future<void> addDetails({
-    required String name,
-    required String city,
-    required String nickName,
-    required DateTime date,
-    required dynamic uid,
-  }) async {
-    if (Auth().currentUser != null) {
-      try {
-        await FirebaseFirestore.instance.collection("users").add({
-          'name': name,
-          'nickName': nickName,
-          'city': city,
-          'date': date,
-          'uid': uid,
-        });
+  // Resmi sıkıştırıp base64 formatına dönüştürme fonksiyonu
+  Future<String?> _compressAndConvertToBase64(File imageFile) async {
+    try {
+      final List<int>? compressedImage =
+          await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        quality: 50,
+      );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const Home()),
-        );
-      } catch (e) {
-        setState(() {
-          errorMessage = 'Error saving details: ${e.toString()}';
-        });
+      if (compressedImage == null) {
+        return null;
       }
+
+      return base64Encode(compressedImage);
+    } catch (e) {
+      print("Resim sıkıştırma hatası: $e");
+      return null;
     }
   }
 
+  // Tarih seçici
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -84,166 +74,167 @@ class _InformationFormState extends State<InformationForm> {
     }
   }
 
+  // Firestore'a kullanıcı bilgilerini yükleme fonksiyonu
+  Future<void> _saveToFirestore() async {
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final String uid = auth.currentUser!.uid;
+    var uuid = Uuid();
+
+    try {
+      await FirebaseFirestore.instance.collection('users').add({
+        'uid': uid,
+        'name': _nameController.text,
+        'nickName': _nickNameController.text,
+        'city': _cityController.text,
+        'birthDate': _dateController.text,
+        'profileImage': _base64Image,
+        'profileId': uuid.v4(),
+        "userPoint" : 0,
+        'timestamp': FieldValue.serverTimestamp(),
+        'dateTime': DateTime.now().millisecondsSinceEpoch,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bilgiler başarıyla yüklendi.")),
+      );
+      
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const Home()),
+        );
+      }
+    } catch (e) {
+      print("FireStore hatası: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Bilgiler yüklenirken hata oluştu.")),
+      );
+    }
+  }
+
+  void _showFullImage(File imageFile) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop(); // Resme tıklayınca dialogu kapatır
+              },
+              child: CircleAvatar(
+                backgroundImage: FileImage(_image!),
+                radius: 258,
+              )),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Kullanıcı Bilgileri'),
+        title: const Text(
+          'Kullanıcı Bilgileri',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 30, right: 30),
+        padding: const EdgeInsets.only(left: 30, right: 30, top: 75),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 1),
-              SvgPicture.asset("assets/icons/info.svg", height: 300),
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: TextFormField(
-                        keyboardType: TextInputType.name,
-                        textInputAction: TextInputAction.next,
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          hintText: "Furkan ISLEK",
-                          prefixIcon: const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: Icon(Icons.person),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextField(
-                      controller: _nickNameController,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.name,
-                      decoration: InputDecoration(
-                        hintText: "sagoceza",
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Icon(Icons.person_outline),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextField(
-                      controller: _cityController,
-                      textInputAction: TextInputAction.next,
-                      keyboardType: TextInputType.streetAddress,
-                      decoration: InputDecoration(
-                        hintText: "Gaziantep",
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Icon(Icons.location_city),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: TextField(
-                      controller: _dateController,
-                      textInputAction: TextInputAction.next,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        hintText: "Doğum Tarihi",
-                        prefixIcon: const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Icon(Icons.calendar_today),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                      onTap: () {
-                        _selectDate(context);
+              const SizedBox(height: 20),
+              _image != null
+                  ? GestureDetector(
+                      onTap: _pickImage,
+                      onLongPress: () {
+                        _showFullImage(
+                            _image!); // Resme tıklayınca tam ekran açılır
                       },
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (selectedDate != null) {
-                          addDetails(
-                            name: _nameController.text,
-                            city: _cityController.text.trim(),
-                            nickName: _nickNameController.text,
-                            date: selectedDate!,
-                            uid: Auth().currentUser?.uid,
-                          );
-                        } else {
-                          setState(() {
-                            errorMessage = "Lütfen doğum tarihini seçin.";
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 226, 211, 245),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: FileImage(_image!),
                       ),
-                      child: Text(
-                        "Kaydet".toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
+                    )
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundImage:
+                          const AssetImage("assets/icons/unknow.svg"),
+                      child: IconButton(
+                        icon: const Icon(Icons.add_a_photo),
+                        onPressed: _pickImage,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        signOut();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 226, 211, 245),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                      child: Text(
-                        "Çıkış Yap".toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    hintText: "Ad",
+                    prefixIcon: const Icon(Icons.person),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
                     ),
-                  ),
-                ],
-              ),
-              if (errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Text(
-                    errorMessage!,
-                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _nickNameController,
+                  decoration: InputDecoration(
+                    hintText: "Kullanıcı Adı",
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _cityController,
+                  decoration: InputDecoration(
+                    hintText: "Şehir",
+                    prefixIcon: const Icon(Icons.location_city),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextField(
+                  controller: _dateController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    hintText: "Doğum Tarihi",
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                  ),
+                  onTap: () {
+                    _selectDate(context);
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _saveToFirestore(); // Kaydetme işlemi
+                },
+                child: const Text("Kaydet"),
+              ),
               const SizedBox(height: 20),
             ],
           ),
