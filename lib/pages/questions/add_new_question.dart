@@ -163,7 +163,13 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
                     width: double.infinity,
                     child: DropdownButtonFormField<QuestionCategory>(
                       decoration: InputDecoration(
+                        hintStyle: TextStyle(
+                          color: _selectedCategory != null
+                              ? const Color.fromARGB(255, 27, 0, 20)
+                              : const Color.fromARGB(255, 155, 147, 147),
+                        ),
                         hintText: "Kategori Seçin",
+                        prefixIcon: const Icon(Icons.category),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),
@@ -191,7 +197,11 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.name,
                     decoration: InputDecoration(
-                      hintText: "-",
+                      hintText: "Soru Başlığı",
+                      hintStyle: TextStyle(
+                          color: _titleController.text.isNotEmpty
+                              ? const Color.fromARGB(255, 27, 0, 20)
+                              : const Color.fromARGB(255, 155, 147, 147)),
                       prefixIcon: const Padding(
                         padding: EdgeInsets.all(16),
                         child: Icon(Icons.title),
@@ -209,8 +219,13 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
                     controller: _informationController,
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.name,
+                    maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: "-",
+                      hintText: "Soruyu Yazınız",
+                      hintStyle:TextStyle(
+                          color: _titleController.text.isNotEmpty
+                              ?const Color.fromARGB(255, 27, 0, 20)
+                              : const Color.fromARGB(255, 155, 147, 147)) ,
                       prefixIcon: const Padding(
                         padding: EdgeInsets.all(16),
                         child: Icon(Icons.description),

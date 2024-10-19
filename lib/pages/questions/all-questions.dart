@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
 import 'package:students_follow_app/pages/questions/question-detail.dart';
-import 'package:students_follow_app/utils/category-utils.dart';
 
 class AllQuestions extends StatefulWidget {
   const AllQuestions({super.key});
@@ -51,7 +50,15 @@ class _AllQuestionsState extends State<AllQuestions> {
             return const Center(child: Text('No questions found.'));
           }
 
-          return ListView.builder(
+          return GridView.builder(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // Her satırda iki kart olacak
+              crossAxisSpacing: 10, // Kartlar arası yatay boşluk
+              mainAxisSpacing: 10, // Kartlar arası dikey boşluk
+              childAspectRatio:
+                  0.75, // Kartların yüksekliği (görsel tasarımı ayarlamak için)
+            ),
+            padding: const EdgeInsets.all(10),
             itemCount: questions.length,
             itemBuilder: (context, index) {
               final question = questions[index];
@@ -72,42 +79,38 @@ class _AllQuestionsState extends State<AllQuestions> {
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
+                        // Görüntü var mı kontrolü
                         question['image'] != null
                             ? Image.memory(
                                 Base64Decoder().convert(question['image']),
                                 fit: BoxFit.fill,
-                                height: 220,
+                                height: 120, // Görüntünün yüksekliği
                                 width: double.infinity,
                               )
                             : const SizedBox(
-                                height: 100,
-                                child: Placeholder()), // Placeholder
+                                height: 120,
+                                child:
+                                    Placeholder()), // Placeholder (görsel yoksa)
 
                         const SizedBox(height: 8),
+
+                        // Başlık
                         Text(
                           question['title'] ?? 'No Title',
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 10,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
 
                         const SizedBox(height: 4),
-                        Text(
-                          question['description'] ?? 'No Information',
-                          style: const TextStyle(fontSize: 14),
-                        ),
 
-                        const SizedBox(height: 8),
+                        // Kategori ve tarih bilgisi
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              getCategoryString(question['category']),
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
                             Text(
                               DateFormat('dd-MM-yyyy HH:mm').format(
                                   DateTime.fromMillisecondsSinceEpoch(

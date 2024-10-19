@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:students_follow_app/pages/Profile/profile.dart';
 import 'package:students_follow_app/services/auth.dart';
 
 class QuestionDetail extends StatefulWidget {
@@ -252,22 +253,46 @@ class _QuestionDetailState extends State<QuestionDetail> {
 
                 const SizedBox(height: 8),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.question['title'] ?? 'No Title',
-                          textAlign: TextAlign.justify,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.question['title'] ?? 'No Title',
+                            textAlign: TextAlign.justify,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Profile(userID: widget.question["uid"]),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              widget.question['nickName'] ?? "",
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Color.fromARGB(255, 76, 52, 117)),
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 16.0),
                       Text(
                         widget.question['description'] ?? 'No Information',
-                        style: const TextStyle(fontSize: 16),
                         textAlign: TextAlign.justify,
+                        style: TextStyle(fontSize: 16),
                       ),
                     ],
                   ),
@@ -282,9 +307,9 @@ class _QuestionDetailState extends State<QuestionDetail> {
                   _isCommenting = !_isCommenting;
                 });
               },
-              label:
-                  Text(_isCommenting ? 'Cevap yazmayı İptal Et' : 'Cevap Yaz',
-                  ),
+              label: Text(
+                _isCommenting ? 'Cevap yazmayı İptal Et' : 'Cevap Yaz',
+              ),
             ),
             if (_isCommenting) ...[
               const SizedBox(height: 20),
@@ -385,7 +410,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                 Expanded(
+                                Expanded(
                                   // Wrap Text in Expanded to prevent overflow
                                   child: Text(
                                     comment['comment'] ?? 'No Comment',

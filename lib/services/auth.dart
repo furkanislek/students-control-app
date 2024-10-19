@@ -44,8 +44,7 @@ class Auth {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> fetchUserInfoByUid(String uid) async {
-
+  Future<List<Map<String, dynamic>>?> fetchUserInfoByUid(String? uid) async {
     QuerySnapshot snapshot =
         await _firestore.collection('users').where('uid', isEqualTo: uid).get();
 
@@ -60,4 +59,20 @@ class Auth {
     }
   }
 
+  Future<List<dynamic>> fetchFollowersByUid(String? uid) async {
+    QuerySnapshot snapshot = await _firestore
+        .collection('followers')
+        .where('userId', isEqualTo: uid)
+        .get();
+
+    if (snapshot.docs.isEmpty) {
+      return [];
+    } else {
+      List<Map<String, dynamic>> userFollowers = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
+      return userFollowers;
+    }
+  }
 }
