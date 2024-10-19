@@ -5,9 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
 import 'package:students_follow_app/services/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
+  final String? userID;
+
+  const Profile({Key? key, required this.userID}) : super(key: key);
 
   @override
   _ProfileState createState() => _ProfileState();
@@ -18,12 +22,55 @@ class _ProfileState extends State<Profile> {
   int userPoint = 9560;
   String? profileImage;
   String? errorMessage;
+  String userNickName = "";
   String? userId;
+
+  String? authUserId;
+  String? authUserNickName;
+
+  int numberOfFollowers = 0;
+  int numberOfFollowed = 0;
 
   @override
   void initState() {
     super.initState();
+    fetchUserFollowers();
     fetchUserInfo();
+    fetchUserInfoByUserId();
+  }
+
+  Future<void> fetchUserFollowers() async {
+    try {
+      final userFollowers = await Auth().fetchFollowersByUid(widget.userID);
+      print(userFollowers);
+      print(widget.userID);
+      print(
+          "************************************************************************");
+      print(
+          "************************************************************************");
+      if (userFollowers.isNotEmpty) {
+        final takipEdenler = userFollowers[0]['takipEdenler'];
+        final takipEdilen = userFollowers[0]['takipEdilen'] ?? [];
+        final countTakipEdenler = takipEdenler.length;
+        final counttakipEdilen = takipEdilen.length;
+        setState(() {
+          numberOfFollowers = countTakipEdenler;
+          numberOfFollowed = counttakipEdilen;
+        });
+        print(userFollowers);
+        print("-----------------------------------------------------------");
+        print("-----------------------------------------------------------");
+      } else {
+        setState(() {
+          numberOfFollowers = 0;
+          numberOfFollowed = 0;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+      });
+    }
   }
 
   Future<void> fetchUserInfo() async {
@@ -31,17 +78,44 @@ class _ProfileState extends State<Profile> {
       final userInfos = await Auth().fetchUserInfo();
       if (userInfos != null && userInfos.isNotEmpty) {
         setState(() {
+          authUserId = userInfos[0]['uid'];
+          authUserNickName = userInfos[0]['nickName'];
+        });
+      } else {
+        setState(() {
+          authUserId = "";
+          authUserNickName = "";
+        });
+      }
+      print("user Info  2 $authUserId  $authUserNickName");
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+      });
+    }
+  }
+
+  Future<void> fetchUserInfoByUserId() async {
+    try {
+      final userInfos = await Auth().fetchUserInfoByUid(widget.userID);
+      if (userInfos != null && userInfos.isNotEmpty) {
+        setState(() {
           profileImage = userInfos[0]['profileImage'];
           userName = userInfos[0]['name'];
-          userId = userInfos[0]['uid'];
+          userNickName = userInfos[0]["nickName"];
           userPoint = userInfos[0]['points'] ?? userPoint;
+          userId = userInfos[0]["uid"];
         });
       } else {
         setState(() {
           profileImage = null;
+          userNickName = "";
           userName = "";
+          userId = "";
         });
       }
+
+      print("user Nick $userId");
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -53,7 +127,50 @@ class _ProfileState extends State<Profile> {
     try {
       return base64Decode(base64String);
     } catch (e) {
-      return null; // Return null in case of error
+      return null;
+    }
+  }
+
+  Future<void> followUser(
+      String followedUserId, String followedUserName) async {
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        throw Exception("User not logged in.");
+      }
+
+      final followersCollection =
+          FirebaseFirestore.instance.collection('followers');
+
+      await followersCollection.doc(authUserId).set({
+        "userId": authUserId, //test
+        "nickName": authUserNickName, //test
+        "timeStamp": Timestamp.now(),
+        'takipEdilen': FieldValue.arrayUnion([
+          {
+            'userId': userId,
+            'nickName': userNickName,
+            'dateTime': DateTime.now().millisecondsSinceEpoch,
+          },
+        ])
+      }, SetOptions(merge: true));
+
+      await followersCollection.doc(userId).set({
+        "userId": userId,
+        "nickName": userNickName,
+        'takipEdenler': FieldValue.arrayUnion([
+          {
+            'userId': authUserId,
+            'nickName': authUserNickName,
+            'dateTime': DateTime.now().millisecondsSinceEpoch,
+          }
+        ])
+      }, SetOptions(merge: true));
+
+      print("Takip işlemi başarılı.");
+    } catch (e) {
+      print("Takip işlemi başarısız: $e");
     }
   }
 
@@ -61,16 +178,23 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profilin"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
       drawer: const Menu(),
       body: RefreshIndicator(
         onRefresh: fetchUserInfo,
         child: Stack(
-          // Use Stack for layering
           children: [
             SvgPicture.asset(
               "assets/icons/blog.svg", // Background SVG
-              fit: BoxFit.cover, // Cover the whole area
+              fit: BoxFit.cover,
               width: 250,
               height: double.infinity,
             ),
@@ -94,6 +218,7 @@ class _ProfileState extends State<Profile> {
                           children: [
                             FloatingActionButton.extended(
                               onPressed: () {
+                                followUser(widget.userID!, userName);
                               },
                               heroTag: 'follow',
                               elevation: 0,
@@ -103,7 +228,10 @@ class _ProfileState extends State<Profile> {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        _ProfileInfoRow(userPoint: userPoint)
+                        _ProfileInfoRow(
+                            userPoint: userPoint,
+                            numberOfFollowers: numberOfFollowers,
+                            numberOfFollowed: numberOfFollowed)
                       ],
                     ),
                   ),
@@ -119,12 +247,18 @@ class _ProfileState extends State<Profile> {
 
 class _ProfileInfoRow extends StatelessWidget {
   final int userPoint;
-  const _ProfileInfoRow({Key? key, required this.userPoint}) : super(key: key);
+  final int numberOfFollowers;
+  final int numberOfFollowed;
+
+  const _ProfileInfoRow(
+      {required this.userPoint,
+      required this.numberOfFollowers,
+      required this.numberOfFollowed});
 
   List<ProfileInfoItem> get items => [
-        const ProfileInfoItem("Soru Sayısı", 120),
-        ProfileInfoItem("Doğru Cevap", userPoint),
-        const ProfileInfoItem("Takipçi Sayısı", 200),
+        ProfileInfoItem("Soru Sayısı", userPoint),
+        ProfileInfoItem("Takip Edilenler", numberOfFollowed),
+        ProfileInfoItem("Takipçiler", numberOfFollowers),
       ];
 
   @override

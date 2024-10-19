@@ -22,6 +22,7 @@ class Menu extends StatefulWidget {
 class _MenuState extends State<Menu> {
   String? errorMessage;
   String? profileImage;
+  String? userID;
   String userName = "";
   bool isLoading = true;
 
@@ -38,12 +39,14 @@ class _MenuState extends State<Menu> {
         setState(() {
           profileImage = userInfos[0]['profileImage'];
           userName = userInfos[0]['name'];
+          userID = userInfos[0]["uid"];
           isLoading = false;
         });
       } else {
         setState(() {
           profileImage = null;
           userName = "";
+          userID = "";
           isLoading = false;
         });
       }
@@ -104,7 +107,8 @@ class _MenuState extends State<Menu> {
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => const Profile()));
+                                    builder: (context) =>
+                                        Profile(userID: userID)));
                           },
                           child: CircleAvatar(
                             backgroundImage: profileImage != null
@@ -183,7 +187,7 @@ class _MenuState extends State<Menu> {
             leading: const Icon(Icons.person),
             title: const Text('Profil Bilgilerim'),
             onTap: () {
-              _navigateToPage(context, const Profile());
+              _navigateToPage(context, Profile(userID: userID));
             },
           ),
           ListTile(
