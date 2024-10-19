@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:students_follow_app/pages/Profile/profile.dart';
 import 'package:students_follow_app/services/auth.dart';
+import 'package:students_follow_app/utils/category-utils.dart';
 
 class QuestionDetail extends StatefulWidget {
   final Map<String, dynamic> question;
@@ -22,6 +23,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
   final TextEditingController _commentController = TextEditingController();
   File? _selectedImage;
   List<Map<String, dynamic>> _comments = [];
+  String? commentUserId;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -54,25 +56,95 @@ class _QuestionDetailState extends State<QuestionDetail> {
       // Toggle the current value of isCorrectAnswer
       bool newCorrectAnswerValue = !currentValue;
 
-      await _firestore
+      // Fetch the userId from the comment
+
+      // Fetch the comment to get the userId
+      QuerySnapshot commentSnapshot = await _firestore
           .collection('comments')
           .where('questionId', isEqualTo: widget.question['questionId'])
           .where('commentId', isEqualTo: int.parse(commentId))
-          .get()
-          .then((QuerySnapshot querySnapshot) {
-        querySnapshot.docs.forEach((doc) {
-          String docId = doc.id;
+          .get();
 
-          FirebaseFirestore.instance.collection('comments').doc(docId).update({
-            'isCorrectAnswer': newCorrectAnswerValue,
-          });
+      if (commentSnapshot.docs.isNotEmpty) {
+        setState(() {
+          commentUserId = commentSnapshot.docs.first['commentUserId'];
         });
+        print('Comment User ID: $commentUserId'); // Log the user ID
+      } else {
+        print('No comment found for commentId: $commentId');
+        return; // Exit if no comment is found
+      }
+
+      // Update the comment's isCorrectAnswer
+      await _firestore
+          .collection('comments')
+          .doc(commentSnapshot.docs.first.id)
+          .update({
+        'isCorrectAnswer': newCorrectAnswerValue,
       });
 
+      // Fetch comments to refresh the UI
       _fetchComments();
+      updateUserPoint(newCorrectAnswerValue);
     } catch (e) {
       print(e);
     }
+  }
+
+Future<void> updateUserPoint(bool isCorrectAnswer) async {
+    var docRef = await _firestore
+        .collection("users")
+        .where("uid", isEqualTo: commentUserId)
+        .limit(1)
+        .get();
+
+    if (docRef.docs.isNotEmpty) {
+      var userDoc = docRef.docs.first;
+
+      if (isCorrectAnswer) {
+        // Eğer doğru cevapsa, puanı artır
+        await userDoc.reference.update({
+          "userPoint": FieldValue.arrayUnion([
+            {
+              'dateTime': DateTime.now().millisecondsSinceEpoch,
+              "userPoint": 10, // Örnek puan değeri
+              "questionId": widget.question["questionId"]
+            }
+          ])
+        });
+      } else {
+        // Mevcut userPoint dizisini al
+        var userData = userDoc.data();
+        List<dynamic> userPoints = userData["userPoint"] ?? [];
+
+        // Kaldırmak için doğru nesneyi bul
+        var pointToRemove;
+        for (var point in userPoints) {
+          // Debug: Her bir öğeyi kontrol et
+          print("Point: $point");
+
+          // Sadece questionId'ye göre eşleşme yap
+          if (point is Map<String, dynamic> &&
+              point["questionId"] == widget.question["questionId"]) {
+            pointToRemove = point;
+            break; // Eşleşen ilk puanı bulduktan sonra döngüyü kır
+          }
+        }
+
+        // Eğer eşleşen bir puan bulduysak kaldır
+        if (pointToRemove != null) {
+          await userDoc.reference.update({
+            "userPoint": FieldValue.arrayRemove([pointToRemove])
+          });
+        }
+      }
+    } else {
+      print("docRef.docs.isEmpty");
+    }
+
+    print("************************************");
+    print(docRef);
+    print("************************************");
   }
 
   Future<int> _getLatestCommentId() async {
@@ -224,7 +296,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Category: ${widget.question['category'] ?? 'No Category'}',
+                    getCategoryString(widget.question["category"]) ,
                     style: const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   Text(

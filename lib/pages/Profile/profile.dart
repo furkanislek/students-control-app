@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/home/home.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,7 +21,6 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   String userName = "";
-  int userPoint = 9560;
   String? profileImage;
   String? errorMessage;
   String userNickName = "";
@@ -31,35 +32,73 @@ class _ProfileState extends State<Profile> {
   int numberOfFollowers = 0;
   int numberOfFollowed = 0;
 
+  bool isFollewed = false;
+
+  int totalPoints = 0;
+  int points = 0;
+  StreamSubscription? followersSubscription;
   @override
   void initState() {
     super.initState();
     fetchUserFollowers();
     fetchUserInfo();
     fetchUserInfoByUserId();
+    listenToUserFollowers();
+  }
+
+  void dispose() {
+    // Abonelikleri iptal et
+    followersSubscription?.cancel();
+    super.dispose();
+  }
+
+  void listenToUserFollowers() {
+    // Takip edilen kullanıcıların verisini dinle
+    followersSubscription = FirebaseFirestore.instance
+        .collection('followers')
+        .doc(widget
+            .userID) // Hangi kullanıcının takipçilerini dinleyecekseniz onu belirtin
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        final data = snapshot.data()!;
+        final takipEdenler = data['takipEdenler'] ?? [];
+        final takipEdilen = data['takipEdilen'] ?? [];
+
+        // Anlık olarak gelen takipçi ve takip edilen sayılarını güncelle
+        setState(() {
+          numberOfFollowers = takipEdenler.length;
+          numberOfFollowed = takipEdilen.length;
+
+          // Auth ile aynı ID'ye sahip biri varsa takip durumunu güncelle
+          isFollewed = takipEdenler
+              .any((item) => item['userId'] == Auth().currentUser!.uid);
+        });
+      }
+    });
   }
 
   Future<void> fetchUserFollowers() async {
     try {
       final userFollowers = await Auth().fetchFollowersByUid(widget.userID);
-      print(userFollowers);
-      print(widget.userID);
-      print(
-          "************************************************************************");
-      print(
-          "************************************************************************");
       if (userFollowers.isNotEmpty) {
-        final takipEdenler = userFollowers[0]['takipEdenler'];
+        final takipEdenler = userFollowers[0]['takipEdenler'] ?? [];
         final takipEdilen = userFollowers[0]['takipEdilen'] ?? [];
+
+        for (var item in takipEdenler) {
+          if (item['userId'] == Auth().currentUser!.uid) {
+            setState(() {
+              isFollewed = true;
+            });
+            break;
+          }
+        }
         final countTakipEdenler = takipEdenler.length;
         final counttakipEdilen = takipEdilen.length;
         setState(() {
           numberOfFollowers = countTakipEdenler;
           numberOfFollowed = counttakipEdilen;
         });
-        print(userFollowers);
-        print("-----------------------------------------------------------");
-        print("-----------------------------------------------------------");
       } else {
         setState(() {
           numberOfFollowers = 0;
@@ -99,12 +138,22 @@ class _ProfileState extends State<Profile> {
     try {
       final userInfos = await Auth().fetchUserInfoByUid(widget.userID);
       if (userInfos != null && userInfos.isNotEmpty) {
+        final takipEdenler = userInfos[0]['userPoint'] ?? [];
+
+        // Tüm userPoint değerlerini toplamak için bir değişken oluştur
+        dynamic totalPoints = 0;
+
+        // Her bir öğeyi kontrol et ve userPoint değerini topla
+        for (var point in takipEdenler) {
+          totalPoints += point['userPoint']; // Burada num'u int'e çeviriyoruz
+        }
+
         setState(() {
           profileImage = userInfos[0]['profileImage'];
           userName = userInfos[0]['name'];
           userNickName = userInfos[0]["nickName"];
-          userPoint = userInfos[0]['points'] ?? userPoint;
           userId = userInfos[0]["uid"];
+          points = totalPoints; // Toplanan puanı burada ayarla
         });
       } else {
         setState(() {
@@ -112,13 +161,14 @@ class _ProfileState extends State<Profile> {
           userNickName = "";
           userName = "";
           userId = "";
+          points = 0; // Eğer kullanıcı bulunamazsa puanı sıfırla
         });
       }
-
-      print("user Nick $userId");
     } catch (e) {
+      print("Error fetching user info: $e");
+      // Hata durumunda da puanı sıfırlayabilirsin
       setState(() {
-        errorMessage = e.toString();
+        points = 0; // Hata durumunda puanı sıfırla
       });
     }
   }
@@ -174,15 +224,67 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  Future<void> unFollowUser() async {
+    try {
+      DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
+          .collection('followers')
+          .doc(authUserId) // Geçerli kullanıcının ID'sine göre belgeyi bul
+          .get();
+
+      List<dynamic> takipEdilenListesi = docSnapshot['takipEdilen'] ?? [];
+
+      // userId'yi içeren öğeyi takip edilen listesinden çıkar
+      takipEdilenListesi.removeWhere((item) => item['userId'] == userId);
+
+      // Güncellenmiş takip edilen listesini Firestore'da güncelle
+      await FirebaseFirestore.instance
+          .collection('followers')
+          .doc(authUserId)
+          .update({
+        'takipEdilen': takipEdilenListesi,
+      });
+
+      DocumentSnapshot docSnapshot2 = await FirebaseFirestore.instance
+          .collection('followers')
+          .doc(userId) // Geçerli kullanıcının ID'sine göre belgeyi bul
+          .get();
+
+      List<dynamic> takipEdenlerListesi = docSnapshot2['takipEdenler'] ?? [];
+
+      // userId'yi içeren öğeyi takip edilen listesinden çıkar
+      takipEdenlerListesi.removeWhere((item) => item['userId'] == authUserId);
+
+      // Güncellenmiş takip edilen listesini Firestore'da güncelle
+      await FirebaseFirestore.instance
+          .collection('followers')
+          .doc(userId)
+          .update({
+        'takipEdenler': takipEdenlerListesi,
+      });
+      print("Takipten Cikma basarili user id $authUserId");
+    } catch (e) {
+      print("Takipten Cıkma Basarisiz $e");
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Profilin"),
+        title: (widget.userID == Auth().currentUser!.uid)
+            ? const Text("Profil Bilgilerin")
+            : const Text("Profil Bilgileri"),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              Navigator.pop(context);
+              if (widget.userID != Auth().currentUser!.uid) {
+                Navigator.pop(context);
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const Home()),
+                );
+              }
             },
           ),
         ],
@@ -216,20 +318,27 @@ class _ProfileState extends State<Profile> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            FloatingActionButton.extended(
-                              onPressed: () {
-                                followUser(widget.userID!, userName);
-                              },
-                              heroTag: 'follow',
-                              elevation: 0,
-                              label: const Text("Follow"),
-                              icon: const Icon(Icons.person_add_alt_1),
-                            ),
+                            if (widget.userID != Auth().currentUser!.uid)
+                              FloatingActionButton.extended(
+                                onPressed: () {
+                                  isFollewed == true
+                                      ? unFollowUser()
+                                      : followUser(widget.userID!, userName);
+                                },
+                                heroTag: 'follow',
+                                elevation: 0,
+                                label: isFollewed
+                                    ? const Text("Takibi Bırak")
+                                    : const Text("Takip Et"),
+                                icon: isFollewed
+                                    ? const Icon(Icons.person_remove_alt_1)
+                                    : const Icon(Icons.person_add_alt_1),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 16),
                         _ProfileInfoRow(
-                            userPoint: userPoint,
+                            userPoint: points,
                             numberOfFollowers: numberOfFollowers,
                             numberOfFollowed: numberOfFollowed)
                       ],
@@ -256,7 +365,7 @@ class _ProfileInfoRow extends StatelessWidget {
       required this.numberOfFollowed});
 
   List<ProfileInfoItem> get items => [
-        ProfileInfoItem("Soru Sayısı", userPoint),
+        ProfileInfoItem("Toplam Puan", userPoint),
         ProfileInfoItem("Takip Edilenler", numberOfFollowed),
         ProfileInfoItem("Takipçiler", numberOfFollowers),
       ];
