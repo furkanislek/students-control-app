@@ -89,7 +89,7 @@ class _InformationFormState extends State<InformationForm> {
         'birthDate': _dateController.text,
         'profileImage': _base64Image,
         'profileId': uuid.v4(),
-        "userPoint" : 0,
+        "userPoint": null,
         'timestamp': FieldValue.serverTimestamp(),
         'dateTime': DateTime.now().millisecondsSinceEpoch,
       });
@@ -97,7 +97,7 @@ class _InformationFormState extends State<InformationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Bilgiler başarıyla yüklendi.")),
       );
-      
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
