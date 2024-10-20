@@ -3,12 +3,14 @@ import 'dart:typed_data';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:students_follow_app/pages/Leaderboard/leaderboard.dart';
 import 'package:students_follow_app/pages/Plans/plans.dart';
 import 'package:students_follow_app/pages/Profile/profile.dart';
 import 'package:students_follow_app/pages/auth/login_register_page.dart';
 import 'package:students_follow_app/pages/home/home.dart';
 import 'package:students_follow_app/pages/questions/add_new_question.dart';
 import 'package:students_follow_app/pages/questions/all-questions.dart';
+import 'package:students_follow_app/pages/questions/quiz/quiz-page.dart';
 import 'package:students_follow_app/pages/questions/your-questions.dart';
 import 'package:students_follow_app/services/auth.dart';
 
@@ -110,13 +112,19 @@ class _MenuState extends State<Menu> {
                                     builder: (context) =>
                                         Profile(userID: userID)));
                           },
-                          child: CircleAvatar(
-                            backgroundImage: profileImage != null
-                                ? MemoryImage(decodeBase64Image(
-                                    profileImage!)!) // Profil resmi varsa
-                                : const AssetImage(
-                                    "assets/icons/unknow.svg"), // Varsayılan resim
-                            radius: 40, // Çemberin yarıçapı
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 44, 0, 53),
+                                shape: BoxShape.circle),
+                            child: CircleAvatar(
+                              backgroundImage: profileImage != null
+                                  ? MemoryImage(decodeBase64Image(
+                                      profileImage!)!) // Profil resmi varsa
+                                  : const AssetImage(
+                                      "assets/icons/unknow.svg"), // Varsayılan resim
+                              radius: 40, // Çemberin yarıçapı
+                            ),
                           ),
                         ),
                         const SizedBox(
@@ -184,6 +192,20 @@ class _MenuState extends State<Menu> {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.quiz),
+            title: const Text("Quiz"),
+            onTap: () {
+              _navigateToPage(context, QuizPage());
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.leaderboard),
+            title: const Text("Sıralama"),
+            onTap: () {
+              _navigateToPage(context, const LeaderboardPage());
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.person),
             title: const Text('Profil Bilgilerim'),
             onTap: () {
@@ -196,7 +218,7 @@ class _MenuState extends State<Menu> {
             onTap: () {
               signOut();
             },
-          )
+          ),
         ],
       ),
     );
