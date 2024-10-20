@@ -37,6 +37,7 @@ class _ProfileState extends State<Profile> {
   int totalPoints = 0;
   int points = 0;
   StreamSubscription? followersSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -126,7 +127,6 @@ class _ProfileState extends State<Profile> {
           authUserNickName = "";
         });
       }
-      print("user Info  2 $authUserId  $authUserNickName");
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
