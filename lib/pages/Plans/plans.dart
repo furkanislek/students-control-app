@@ -106,6 +106,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       'userId': uid,
       'createdDate': DateTime.now().millisecondsSinceEpoch,
       'taskId': uuid.v4(),
+      'taskPoint': 10,
     }).then((value) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Hedef başarıyla kaydedildi')),
