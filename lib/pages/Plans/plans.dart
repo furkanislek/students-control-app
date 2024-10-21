@@ -55,15 +55,18 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     if (time == null) return 'Select Time';
     final now = DateTime.now();
     final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-    return DateFormat.jm().format(dt);
+    return DateFormat.Hm().format(dt);
   }
 
   // Function to pick time
   Future<void> _pickTime({required bool isStart}) async {
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+    final now = TimeOfDay.now();
+
+    final hour = (now.hour + 3) % 24;
+    final newTime = TimeOfDay(hour: hour, minute: now.minute);
+
+    final pickedTime =
+        await showTimePicker(context: context, initialTime: newTime);
     if (pickedTime != null) {
       setState(() {
         if (isStart) {
@@ -89,6 +92,9 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       _startTime?.minute ?? 0,
     );
 
+    DateTime startDateTimeUtc =
+        startDateTime.toUtc().subtract(Duration(hours: 3));
+
     DateTime endDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -96,17 +102,19 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       _endTime?.hour ?? 0,
       _endTime?.minute ?? 0,
     );
+    DateTime endDateTimeUtc = endDateTime.toUtc().subtract(Duration(hours: 3));
     // Veriyi yüklüyoruz
     await FirebaseFirestore.instance.collection('tasks').add({
-      'date': _selectedDate,
+      'date': _selectedDate.toUtc().subtract(Duration(hours: 3)),
       'title': _titleContainer.text,
       'category': _selectedCategory,
-      'start_time': startDateTime,
-      'end_time': endDateTime,
+      'start_time': startDateTimeUtc,
+      'end_time': endDateTimeUtc,
       'userId': uid,
       'createdDate': DateTime.now().millisecondsSinceEpoch,
       'taskId': uuid.v4(),
       'taskPoint': 10,
+      'isCompleted': false,
     }).then((value) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Hedef başarıyla kaydedildi')),

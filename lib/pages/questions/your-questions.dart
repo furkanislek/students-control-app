@@ -43,7 +43,7 @@ class _YourQuestionsState extends State<YourQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         title: const Text("Soruların"),
       ),
       drawer: const Menu(),
@@ -126,7 +126,7 @@ class _YourQuestionsState extends State<YourQuestions> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                             getCategoryString(question['category']),
+                              getCategoryString(question['category']),
                               style: const TextStyle(
                                   fontSize: 12, color: Colors.grey),
                             ),
