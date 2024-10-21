@@ -188,7 +188,7 @@ class _MenuState extends State<Menu> {
             leading: const Icon(Icons.people),
             title: const Text('Takip'),
             onTap: () {
-              _navigateToPage(context, const Plans());
+              _navigateToPage(context, TaskDetailsScreen());
             },
           ),
           ListTile(
