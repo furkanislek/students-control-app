@@ -4,10 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/questions/add-question.dart';
+import 'package:students_follow_app/pages/questions/all-questions.dart';
 import 'package:students_follow_app/pages/questions/question-enum.dart';
+import 'package:students_follow_app/pages/questions/your-questions.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,13 +22,14 @@ class AddNewQuestion extends StatefulWidget {
 class _AddNewQuestionState extends State<AddNewQuestion> {
   String? questionId;
   List<Map<String, dynamic>> _userInfo = [];
-  QuestionCategory? _selectedCategory; // Store selected category
+  QuestionCategory? _selectedCategory;
+  File? _imageFile;
 
   @override
   void initState() {
     super.initState();
     var uuid = Uuid();
-    questionId = uuid.v4(); // Create a random UUID
+    questionId = uuid.v4();
   }
 
   final TextEditingController _informationController = TextEditingController();
@@ -39,6 +41,9 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       File imageFile = File(image.path);
+      setState(() {
+        _imageFile = imageFile;
+      });
       String? base64Image = await compressAndConvertToBase64(imageFile);
       return base64Image;
     }
@@ -56,7 +61,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
       await FirebaseFirestore.instance.collection('questions').add({
         'uid': uid,
         'image': base64Image,
-        'category': categoryId, // Use category ID here
+        'category': categoryId,
         'description': description,
         'title': title,
         'timestamp': FieldValue.serverTimestamp(),
@@ -132,7 +137,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
 
     await saveImageToFirestore(
       _base64Image,
-      _selectedCategory!.id, // Use the selected category ID
+      _selectedCategory!.id,
       _informationController.text,
       _titleController.text,
     );
@@ -140,123 +145,96 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Soru başarıyla yüklendi.")),
     );
+
+    setState(() {
+      _base64Image = null;
+      _imageFile = null;
+      _informationController.clear();
+      _titleController.clear();
+      _selectedCategory = null;
+    });
+  }
+
+  void _selectCategory(QuestionCategory category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+
+  Widget _buildImageButtonOrImage() {
+    if (_base64Image != null && _imageFile != null) {
+      return GestureDetector(
+        onTap: uploadQuestionImage,
+        child: Container(
+          height: 150,
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey, width: 2),
+            borderRadius: BorderRadius.circular(15.0),
+            image: DecorationImage(
+              image: FileImage(_imageFile!),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
+    } else {
+      return SizedBox(
+        height: 150,
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: uploadQuestionImage,
+          icon: const Icon(Icons.image),
+          label: const Text("Görsel Yükle"),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0),
+                side: const BorderSide(
+                    width: 1,
+                    style: BorderStyle.solid,
+                    color: const Color.fromARGB(134, 66, 5, 77))),
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Soru Ekle"),
-      ),
-      drawer: const Menu(),
-      body: Padding(
-          padding: const EdgeInsets.only(left: 30, right: 30),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SvgPicture.asset("assets/icons/info.svg", height: 300),
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: DropdownButtonFormField<QuestionCategory>(
-                      decoration: InputDecoration(
-                        hintStyle: TextStyle(
-                          color: _selectedCategory != null
-                              ? const Color.fromARGB(255, 27, 0, 20)
-                              : const Color.fromARGB(255, 155, 147, 147),
-                        ),
-                        hintText: "Kategori Seçin",
-                        prefixIcon: const Icon(Icons.category),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                      value: _selectedCategory,
-                      items: QuestionCategory.values.map((category) {
-                        return DropdownMenuItem<QuestionCategory>(
-                          value: category,
-                          child: Text(category.toString().split('.').last),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextField(
-                    controller: _titleController,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.name,
-                    decoration: InputDecoration(
-                      hintText: "Soru Başlığı",
-                      hintStyle: TextStyle(
-                          color: _titleController.text.isNotEmpty
-                              ? const Color.fromARGB(255, 27, 0, 20)
-                              : const Color.fromARGB(255, 155, 147, 147)),
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Icon(Icons.title),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: TextField(
-                    controller: _informationController,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.name,
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: "Soruyu Yazınız",
-                      hintStyle:TextStyle(
-                          color: _titleController.text.isNotEmpty
-                              ?const Color.fromARGB(255, 27, 0, 20)
-                              : const Color.fromARGB(255, 155, 147, 147)) ,
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Icon(Icons.description),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        uploadQuestionImage();
-                      },
-                      child: const Text("Soru Görselini Yükle")),
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                      onPressed: () {
-                        uploadQuestionToFirestore();
-                      },
-                      child: const Text("Soruyu Yükle")),
-                ),
-              ],
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF2F2F2),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF2F2F2),
+          toolbarHeight: 60,
+          title: const Text(
+            "Sorular",
+            style: TextStyle(
+              fontSize: 24,
             ),
-          )),
+            textAlign: TextAlign.center,
+          ),
+          bottom: const TabBar(
+            indicatorColor: Colors.purple,
+            labelColor: Colors.purple,
+            unselectedLabelColor: Colors.grey,
+            tabs: [
+              Tab(text: "Soru Ekle", icon: Icon(Icons.add)),
+              Tab(text: "Soruların", icon: Icon(Icons.question_answer)),
+              Tab(text: "Tüm Sorular", icon: Icon(Icons.list)),
+            ],
+          ),
+        ),
+        body: const TabBarView(
+          children: [
+            AddNewQuestionPage(),
+            YourQuestions(),
+            AllQuestions(),
+          ],
+        ),
+      ),
     );
   }
 }

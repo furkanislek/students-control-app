@@ -63,15 +63,13 @@ class _QuizPageState extends State<QuizPage> {
   Future<void> checkIsExcecuted() async {
     try {
       final userInfo = await Auth().fetchUserInfoByUid(Auth().currentUser!.uid);
+      print("user Info : $userInfo");
       final userPoints = userInfo![0]["userPoint"] ?? [];
 
       for (var item in userPoints) {
-        var itemQuestionId = item["questionId"];
+        print("item $item");
         var quizId2 = questions;
-        print("item questionId $itemQuestionId");
-        print("item quizId $quizId");
-
-        if (item["questionId"] == quizId2) {
+        if ((item["questionId"] == quizId2) || quizId == null) {
           setState(() {
             isExecuted = true;
           });
@@ -155,6 +153,9 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("------------------------------------------");
+    print(isExecuted);
+    print("------------------------------------------");
     return Scaffold(
       appBar: GradientAppBar(
         title: const Text('Quiz'),

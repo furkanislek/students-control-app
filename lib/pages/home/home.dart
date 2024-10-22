@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/components/home/summary-progress.dart';
 import 'package:students_follow_app/pages/auth/login_register_page.dart';
 import 'package:students_follow_app/services/auth.dart';
 
@@ -15,6 +15,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   TabController? _tabController;
   String? errorMessage;
+  var isCompletedLength = 0;
+  var tasksLength = 0;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -31,7 +33,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    _tabController?.dispose(); // TabController'ı yok et
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -50,48 +52,47 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _fetchTasks() async {
-    // Kullanıcının UID'sini al
+    isCompletedLength = 0;
     final user = _auth.currentUser;
     if (user == null) return;
 
-    // Firestore'dan görevleri al
     final tasks = await _firestore
         .collection('tasks')
         .where('userId', isEqualTo: user.uid)
         .get();
-
     final now = DateTime.now();
-
-    // Her bir görev için durumları kontrol et
+    print(tasks.docs.length);
     for (var doc in tasks.docs) {
+      print(doc.data());
       final taskData = doc.data();
 
-      // Zaman damgalarını DateTime'a dönüştür
+      if (taskData["isCompleted"]) {
+        setState(() {
+          isCompletedLength++;
+        });
+      }
+
       final endDate = (taskData['end_time'] as Timestamp).toDate();
       final startDate = (taskData['start_time'] as Timestamp).toDate();
 
-      // Hata ayıklama için tarihleri yazdır
-      print("Şu anki zaman: $now");
-      print("Bitiş zamanı: $endDate");
-      print("Başlangıç zamanı: $startDate");
-
       if (endDate.isBefore(now)) {
-        // Süresi dolmuş
         _expiredTasks.add(taskData);
       } else if (startDate.isBefore(now) && endDate.isAfter(now)) {
-        // Şu anda aktif olan
         _activeTasks.add(taskData);
       } else if (startDate.isAfter(now)) {
-        // Gelecekte başlayacak
         _upcomingTasks.add(taskData);
       }
     }
 
-    setState(() {});
+    setState(() {
+      tasksLength = tasks.docs.length;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final finishedLength = _expiredTasks.length;
+    final unFinishedLength = _activeTasks.length + _upcomingTasks.length;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Görevler'),
@@ -102,18 +103,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
-      drawer: const Menu(),
+      backgroundColor: Color.fromARGB(0, 7, 7, 196),
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Diğer bir başlık veya bileşen ekleyebilirsiniz.',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
+          Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: SummaryProgress(
+                  finishedLength: finishedLength,
+                  unFinishedLength: unFinishedLength,
+                  isCompletedLength: isCompletedLength,
+                  tasksLength: tasksLength)),
           TabBar(
-            controller: _tabController, // TabController ile ilişkilendir
+            controller: _tabController,
             indicatorColor: Colors.purple,
             labelColor: Colors.purple,
             unselectedLabelColor: Colors.grey,
@@ -123,13 +124,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               Tab(text: "Gelecek"),
             ],
           ),
+          const SizedBox(height: 10),
           Expanded(
             child: TabBarView(
-              controller:
-                  _tabController, // TabBarView ile TabController'ı bağla
+              controller: _tabController,
               children: [
-                _buildTaskList(_expiredTasks, Colors.redAccent),
-                _buildTaskList(_activeTasks, Colors.green),
+                _buildTaskList(
+                    _expiredTasks, const Color.fromARGB(255, 224, 104, 67)),
+                _buildTaskList(
+                    _activeTasks, const Color.fromARGB(255, 131, 185, 119)),
                 _buildTaskList(_upcomingTasks, Colors.blue),
               ],
             ),
@@ -153,19 +156,42 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   double _calculateProgress(int currentTime, int startDate, int endDate) {
     if (currentTime < startDate) {
-      return 0; // Gelecek görevler için ilerleme 0
+      return 0;
     } else if (currentTime > endDate) {
-      return 100; // Bitmiş görevler için ilerleme 100
+      return 100;
     } else {
-      // Aktif görevler için ilerlemeyi hesapla
       return ((currentTime - startDate) * 100 / (endDate - startDate))
           .clamp(0, 100);
     }
   }
 
-  Widget _buildTaskTile(Map<String, dynamic> task, Color color) {
-    // StartDate ve EndDate'in null olup olmadığını kontrol ediyoruz
+  Future<void> _updateTaskCompletion(String taskId, bool isCompleted) async {
+    try {
+      var docRef = await _firestore
+          .collection("tasks")
+          .where("taskId", isEqualTo: taskId)
+          .limit(1)
+          .get();
 
+      if (docRef.docs.isNotEmpty) {
+        var taskDoc = docRef.docs.first;
+        await taskDoc.reference.update({"isCompleted": !isCompleted});
+      } else {
+        print("Task Bulunamadı");
+      }
+
+      setState(() {
+        _expiredTasks.clear();
+        _activeTasks.clear();
+        _upcomingTasks.clear();
+      });
+      await _fetchTasks();
+    } catch (e) {
+      print("Görevi güncellerken hata: $e");
+    }
+  }
+
+  Widget _buildTaskTile(Map<String, dynamic> task, Color color) {
     final Timestamp? startTimestamp = task['start_time'] as Timestamp?;
     final Timestamp? endTimestamp = task['end_time'] as Timestamp?;
     final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -174,9 +200,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final int endDate = endTimestamp!.millisecondsSinceEpoch;
 
     final int remainingTime = endDate - currentTime;
-    final int hours = (remainingTime ~/ (1000 * 60 * 60)).abs(); // Saat
-    final int minutes = (remainingTime ~/ (1000 * 60)).abs() % 60; // Dakika
-    // Process yüzdesi hesaplama
+    final int hours = (remainingTime ~/ (1000 * 60 * 60)).abs();
+    final int minutes = (remainingTime ~/ (1000 * 60)).abs() % 60;
     double progressPercentage =
         _calculateProgress(currentTime, startDate, endDate);
 
@@ -190,69 +215,122 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         [Icons.info_outline_sharp, 'Diğer'],
       ];
 
-      // Kategoriye göre uygun ikonu döndür
       for (var item in _categories) {
         if (item[1] == category) {
-          return item[0]; // İkonu döndür
+          return item[0];
         }
       }
 
-      return Icons.help; // Eğer kategori bulunamazsa varsayılan ikon
+      return Icons.help;
     }
 
     IconData taskIcon = _getCategoryIcon(task['category']);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
+    final bool isCompleted = task['isCompleted'] ?? false;
+    final Color cardColor = isCompleted
+        ? const Color.fromARGB(255, 0, 107, 23)
+        : const Color.fromARGB(255, 187, 170, 170);
+    final Color iconColor =
+        isCompleted ? Color.fromARGB(255, 131, 185, 119) : color;
+
+    return Dismissible(
+      key: Key(task['taskId']),
+      background: Container(
+        color: !isCompleted
+            ? const Color.fromARGB(255, 131, 185, 119)
+            : Colors.red,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        alignment: Alignment.center,
+        child:
+            Icon(!isCompleted ? Icons.check : Icons.undo, color: Colors.white),
+      ),
+      secondaryBackground: Container(
+        color: !isCompleted
+            ? const Color.fromARGB(255, 131, 185, 119)
+            : const Color(0xFFEB7E5C),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        alignment: Alignment.centerRight,
+        child:
+            Icon(!isCompleted ? Icons.check : Icons.undo, color: Colors.white),
+      ),
+      onDismissed: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          await _updateTaskCompletion(task['taskId'], isCompleted);
+        } else if (direction == DismissDirection.startToEnd) {
+          await _updateTaskCompletion(task['taskId'], isCompleted);
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: cardColor,
+              width: 2.0,
             ),
-          ],
-        ),
-        child: ListTile(
-          leading: Icon(taskIcon, color: color),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(task['title']),
-              Text(
-                "$hours Saat $minutes Dakika", // Kalan süreyi saat ve dakika cinsinden göster
-                style: const TextStyle(fontSize: 12),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Kategori: ${task['category']}"),
-              const SizedBox(height: 8),
-              Stack(
-                alignment: Alignment.center, // Yüzdeyi ortalamak için
-                children: [
-                  LinearProgressIndicator(
-                    value: progressPercentage / 100,
-                    backgroundColor: Colors.grey[300],
-                    minHeight: 20,
-                    valueColor: AlwaysStoppedAnimation<Color>(color),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // İlk satır: İkon, Başlık, Süre
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(taskIcon, color: iconColor),
+                        const SizedBox(width: 8),
+                        Text(task['title'],
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    Text(
+                      "$hours Saat $minutes Dakika",
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // İkinci satır: Kategori
+                Text("Kategori: ${task['category']}"),
+                const SizedBox(height: 8),
+                // Üçüncü satır: Progress Bar genişliği %100
+                SizedBox(
+                  width: double.infinity,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      LinearProgressIndicator(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(20)),
+                        value: progressPercentage / 100,
+                        backgroundColor: Colors.grey[300],
+                        minHeight: 20,
+                        valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                      ),
+                      Text(
+                        "${progressPercentage.toStringAsFixed(2)}%",
+                        style: const TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                    ],
                   ),
-                  Text(
-                    "${progressPercentage.toStringAsFixed(2)}%", // İlerleme yüzdesini yazdır
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold), // Yazı rengi
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

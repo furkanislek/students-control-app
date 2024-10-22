@@ -1,17 +1,9 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:students_follow_app/pages/Leaderboard/leaderboard.dart';
-import 'package:students_follow_app/pages/Plans/plans.dart';
-import 'package:students_follow_app/pages/Profile/profile.dart';
 import 'package:students_follow_app/pages/auth/login_register_page.dart';
 import 'package:students_follow_app/pages/home/home.dart';
 import 'package:students_follow_app/pages/questions/add_new_question.dart';
-import 'package:students_follow_app/pages/questions/all-questions.dart';
 import 'package:students_follow_app/pages/questions/quiz/quiz-page.dart';
-import 'package:students_follow_app/pages/questions/your-questions.dart';
 import 'package:students_follow_app/services/auth.dart';
 
 class Menu extends StatefulWidget {
@@ -22,8 +14,8 @@ class Menu extends StatefulWidget {
 }
 
 class _MenuState extends State<Menu> {
+  int _currentIndex = 0;
   String? errorMessage;
-  String? profileImage;
   String? userID;
   String userName = "";
   bool isLoading = true;
@@ -39,14 +31,12 @@ class _MenuState extends State<Menu> {
       final userInfos = await Auth().fetchUserInfo();
       if (userInfos != null && userInfos.isNotEmpty) {
         setState(() {
-          profileImage = userInfos[0]['profileImage'];
           userName = userInfos[0]['name'];
           userID = userInfos[0]["uid"];
           isLoading = false;
         });
       } else {
         setState(() {
-          profileImage = null;
           userName = "";
           userID = "";
           isLoading = false;
@@ -60,13 +50,6 @@ class _MenuState extends State<Menu> {
     }
   }
 
-  void _navigateToPage(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
-  }
-
   Future<void> signOut() async {
     try {
       await Auth().signOut();
@@ -74,150 +57,57 @@ class _MenuState extends State<Menu> {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) => const LoginRegisterPage()));
       }
-    } on FirebaseAuthException catch (e) {
+    } catch (e) {
       setState(() {
-        errorMessage = e.message;
+        errorMessage = e.toString();
       });
     }
   }
 
-  Uint8List? decodeBase64Image(String base64String) {
-    try {
-      return base64Decode(base64String);
-    } catch (e) {
-      return null; // Hata durumunda null döner
-    }
-  }
+  // Alt menüde göstermek istediğiniz sayfalar
+  final List<Widget> _pages = [
+    const Home(),
+    const AddNewQuestion(), // Sorular menüsü altında sadece "Soru Ekle"
+    QuizPage(),
+    const LeaderboardPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 186, 104, 200),
-            ),
-            child: GestureDetector(
-              child: isLoading
-                  ? const CircularProgressIndicator() // Yükleniyor göstergesi
-                  : Row(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        Profile(userID: userID)));
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(2),
-                            decoration: const BoxDecoration(
-                                color: Color.fromARGB(255, 44, 0, 53),
-                                shape: BoxShape.circle),
-                            child: CircleAvatar(
-                              backgroundImage: profileImage != null
-                                  ? MemoryImage(decodeBase64Image(
-                                      profileImage!)!) // Profil resmi varsa
-                                  : const AssetImage(
-                                      "assets/icons/unknow.svg"), // Varsayılan resim
-                              radius: 40, // Çemberin yarıçapı
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                            width: 16), // Çember ile metin arasında boşluk
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Home()));
-                          },
-                          child: Text(
-                            userName,
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 21, 3, 32),
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isLoading ? 'Yükleniyor...' : userName),
+        backgroundColor: const Color.fromARGB(255, 186, 104, 200),
+      ),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Ana Sayfa',
           ),
-          Theme(
-            data: Theme.of(context).copyWith(
-                dividerColor: Colors.transparent), // Divider'ı kaldırmak için
-            child: ExpansionTile(
-              leading: const Icon(Icons.question_mark),
-              title: const Text('Sorular'),
-              backgroundColor: Colors.transparent,
-              collapsedBackgroundColor: Colors.transparent,
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.add_box),
-                  title: const Text('Soru Ekle'),
-                  contentPadding: const EdgeInsets.only(left: 32.0),
-                  onTap: () {
-                    _navigateToPage(context, const AddNewQuestion());
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.question_answer),
-                  title: const Text('Soruların'),
-                  contentPadding: const EdgeInsets.only(left: 32.0),
-                  onTap: () {
-                    _navigateToPage(context, const YourQuestions());
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.list),
-                  title: const Text('Tüm Sorular'),
-                  contentPadding: const EdgeInsets.only(left: 32.0),
-                  onTap: () {
-                    _navigateToPage(context, const AllQuestions());
-                  },
-                ),
-              ],
-            ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add_box),
+            label: 'Soru Ekle',
           ),
-          ListTile(
-            leading: const Icon(Icons.people),
-            title: const Text('Takip'),
-            onTap: () {
-              _navigateToPage(context, TaskDetailsScreen());
-            },
+          BottomNavigationBarItem(
+            icon: Icon(Icons.quiz),
+            label: 'Quiz',
           ),
-          ListTile(
-            leading: const Icon(Icons.quiz),
-            title: const Text("Quiz"),
-            onTap: () {
-              _navigateToPage(context, QuizPage());
-            },
+          BottomNavigationBarItem(
+            icon: Icon(Icons.leaderboard),
+            label: 'Sıralama',
           ),
-          ListTile(
-            leading: const Icon(Icons.leaderboard),
-            title: const Text("Sıralama"),
-            onTap: () {
-              _navigateToPage(context, const LeaderboardPage());
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text('Profil Bilgilerim'),
-            onTap: () {
-              _navigateToPage(context, Profile(userID: userID));
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text("Çıkış Yap"),
-            onTap: () {
-              signOut();
-            },
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
           ),
         ],
       ),
