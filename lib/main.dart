@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:students_follow_app/pages/auth/login_register_page.dart';
+import 'package:students_follow_app/pages/home/menu-home.dart'; // Ana sayfa import edildi
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import edildi
 import 'firebase_options.dart';
 
 void main() async {
@@ -13,10 +15,30 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    checkUserStatus();
+  }
+
+  void checkUserStatus() async {
+    FirebaseAuth.instance.authStateChanges().listen((User? currentUser) {
+      setState(() {
+        user = currentUser; 
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,7 +48,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const LoginRegisterPage(),
+      home: user == null ? const LoginRegisterPage() : const MenuHome(),
     );
   }
 }

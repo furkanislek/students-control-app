@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/components/menu/menu.dart';
+import 'package:students_follow_app/pages/home/menu-home.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
@@ -134,10 +134,20 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       appBar: AppBar(
         title: const Text("Hedef Ekle"),
         backgroundColor: const Color(0xFFF2F2F2),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const MenuHome()),
+              );
+            },
+            icon: Icon(Icons.home),
+          ),
+        ],
       ),
-      drawer: const Menu(),
       bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10),
           child: ElevatedButton(
             onPressed: _saveTaskToFirebase,
             style: ElevatedButton.styleFrom(

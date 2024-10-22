@@ -4,8 +4,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:students_follow_app/components/menu/menu.dart';
-import 'package:students_follow_app/pages/home/home.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -273,23 +271,7 @@ class _ProfileState extends State<Profile> {
         title: (widget.userID == Auth().currentUser!.uid)
             ? const Text("Profil Bilgilerin")
             : const Text("Profil Bilgileri"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              if (widget.userID != Auth().currentUser!.uid) {
-                Navigator.pop(context);
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Home()),
-                );
-              }
-            },
-          ),
-        ],
       ),
-      drawer: const Menu(),
       body: RefreshIndicator(
         onRefresh: fetchUserInfo,
         child: Stack(

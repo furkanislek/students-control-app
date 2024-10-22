@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:students_follow_app/pages/home/home.dart';
 import 'package:students_follow_app/pages/home/informationForm.dart';
+import 'package:students_follow_app/pages/home/menu-home.dart';
 import 'package:students_follow_app/services/auth.dart';
 
 class LoginRegisterPage extends StatefulWidget {
@@ -57,8 +57,8 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
 
         if (userExists) {
           if (mounted) {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (context) => const Home()));
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => const MenuHome()));
           }
         } else {
           if (mounted) {
@@ -90,7 +90,7 @@ class _LoginRegisterPageState extends State<LoginRegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.only(left: 30, right: 30,top:50),
+        padding: const EdgeInsets.only(left: 30, right: 30, top: 50),
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
