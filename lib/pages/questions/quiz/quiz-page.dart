@@ -92,28 +92,23 @@ class _QuizPageState extends State<QuizPage> {
 
     bool isCorrect = selectedAnswer == correctAnswer;
 
-    // Cevabı güncelle
     setState(() {
       selectedAnswers[questionId] = selectedAnswer;
     });
 
-    // Kullanıcı doğru cevap verirse puanı artır
     if (isCorrect) {
       await updateUserPoints(points);
     }
 
-    // Snackbar ile sonucu göster
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(isCorrect ? 'Doğru cevap!' : 'Yanlış cevap!')),
     );
 
-    // Bir sonraki soruya geç
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
       });
     } else {
-      // Tüm sorular cevaplandığında Firestore'a gönder
       await submitAllAnswers();
     }
   }
@@ -128,7 +123,6 @@ class _QuizPageState extends State<QuizPage> {
     if (docRef.docs.isNotEmpty) {
       var userDoc = docRef.docs.first;
 
-      // Kullanıcı doğru cevapsa, puanı artır
       await userDoc.reference.update({
         "userPoint": FieldValue.arrayUnion([
           {
@@ -142,13 +136,11 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   Future<void> submitAllAnswers() async {
-    // Cevap gönderildikten sonra kullanıcıya bilgi ver
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Tüm cevaplarınız gönderildi!')),
     );
 
-    // Quiz sayfasını kapat veya yönlendirme yap
-    Navigator.pop(context); // Quiz sayfasından çıkmak için
+    Navigator.pop(context);
   }
 
   @override
@@ -238,7 +230,7 @@ class _QuizPageState extends State<QuizPage> {
                                               ? Colors.green
                                               : Colors.red)
                                           : const Color.fromARGB(255, 255, 254,
-                                              254), // Seçilmediyse gri
+                                              254), 
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(8.0),

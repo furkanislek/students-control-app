@@ -64,12 +64,11 @@ class _MenuState extends State<Menu> {
     }
   }
 
-  // Alt menüde göstermek istediğiniz sayfalar
   final List<Widget> _pages = [
     const Home(),
-    const AddNewQuestion(), // Sorular menüsü altında sadece "Soru Ekle"
+    const AddNewQuestion(),
     QuizPage(),
-    const LeaderboardPage(),
+    LeaderboardPage(),
   ];
 
   @override

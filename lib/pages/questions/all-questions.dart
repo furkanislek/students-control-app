@@ -13,6 +13,7 @@ class AllQuestions extends StatefulWidget {
 
 class _AllQuestionsState extends State<AllQuestions> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  var commentCount = 0;
 
   Future<List<Map<String, dynamic>>> _fetchAllQuestions() async {
     QuerySnapshot snapshot = await _firestore
@@ -28,6 +29,7 @@ class _AllQuestionsState extends State<AllQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F2),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchAllQuestions(),
         builder: (context, snapshot) {
@@ -47,13 +49,12 @@ class _AllQuestionsState extends State<AllQuestions> {
 
           return GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, // Her satırda iki kart olacak
-              crossAxisSpacing: 10, // Kartlar arası yatay boşluk
-              mainAxisSpacing: 10, // Kartlar arası dikey boşluk
-              childAspectRatio:
-                  0.75, // Kartların yüksekliği (görsel tasarımı ayarlamak için)
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 0.75,
             ),
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             itemCount: questions.length,
             itemBuilder: (context, index) {
               final question = questions[index];
@@ -69,9 +70,10 @@ class _AllQuestionsState extends State<AllQuestions> {
                 },
                 child: Card(
                   margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -107,7 +109,7 @@ class _AllQuestionsState extends State<AllQuestions> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              DateFormat('dd-MM-yyyy HH:mm').format(
+                              DateFormat('dd/MM/yyyy').format(
                                   DateTime.fromMillisecondsSinceEpoch(
                                       question['dateTime'])),
                               style: const TextStyle(

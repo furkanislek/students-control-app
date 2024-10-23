@@ -193,7 +193,7 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
                 side: const BorderSide(
                     width: 1,
                     style: BorderStyle.solid,
-                    color: const Color.fromARGB(134, 66, 5, 77))),
+                    color: Color.fromARGB(134, 66, 5, 77))),
           ),
         ),
       );

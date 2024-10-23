@@ -95,6 +95,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final unFinishedLength = _activeTasks.length + _upcomingTasks.length;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: const Color(0xFFF2F2F2),
         title: const Text('Görevler'),
         actions: [
           IconButton(
@@ -103,7 +104,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
-      backgroundColor: Color.fromARGB(0, 7, 7, 196),
+      backgroundColor: const Color(0xFFF2F2F2),
       body: Column(
         children: [
           Padding(
@@ -284,7 +285,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // İlk satır: İkon, Başlık, Süre
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -304,10 +304,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(height: 8),
-                // İkinci satır: Kategori
                 Text("Kategori: ${task['category']}"),
                 const SizedBox(height: 8),
-                // Üçüncü satır: Progress Bar genişliği %100
                 SizedBox(
                   width: double.infinity,
                   child: Stack(

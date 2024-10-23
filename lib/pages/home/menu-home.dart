@@ -24,7 +24,7 @@ class _MenuHomeState extends State<MenuHome> {
     super.initState();
     userID = Auth().currentUser!.uid;
     _pages = [
-      const LeaderboardPage(),
+      LeaderboardPage(),
       Profile(userID: userID),
       const Home(),
       const AddNewQuestion(),
@@ -37,8 +37,9 @@ class _MenuHomeState extends State<MenuHome> {
     return Scaffold(
       body: _pages[_pageIndex],
       bottomNavigationBar: CurvedNavigationBar(
+        animationDuration: const Duration(milliseconds: 500),
         index: 2,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF2F2F2),
         height: 60,
         color: Color(0xFF8256DF),
         items: const <Widget>[
