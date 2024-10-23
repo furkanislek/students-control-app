@@ -41,6 +41,7 @@ class _YourQuestionsState extends State<YourQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xfff2f2f2),
       body: FutureBuilder<List<Map<String, dynamic>>?>(
         future: _fetchUserQuestions(),
         builder: (context, snapshot) {
@@ -113,6 +114,8 @@ class _YourQuestionsState extends State<YourQuestions> {
                         Text(
                           question['description'] ?? 'No Information',
                           style: const TextStyle(fontSize: 14),
+                          maxLines: 4,
+                          overflow: TextOverflow.ellipsis,
                         ),
 
                         const SizedBox(height: 8),

@@ -268,11 +268,12 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                       children: [
                         const SizedBox(height: 10),
                         SizedBox(
-                          height: 30,
+                          height: 40,
                           child: TextField(
                             controller: _titleController,
                             textInputAction: TextInputAction.done,
                             keyboardType: TextInputType.text,
+                            maxLength: 35,
                             decoration: InputDecoration(
                               hintText: "Soru Başlığını Yazınız.",
                               hintStyle: TextStyle(

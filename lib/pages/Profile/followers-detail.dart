@@ -21,7 +21,6 @@ class _FollowersPageState extends State<FollowersPage> {
     fetchFollowers();
   }
 
-  // Firestore'dan takipçi listesini çeken fonksiyon
   Future<void> fetchFollowers() async {
     try {
       setState(() {
@@ -70,7 +69,6 @@ class _FollowersPageState extends State<FollowersPage> {
     );
   }
 
-  // Tarih ve zaman formatlama fonksiyonu
   String _formatDateTime(int dateTimeMillis) {
     DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(dateTimeMillis);
     return "${dateTime.day}/${dateTime.month}/${dateTime.year} - ${dateTime.hour}:${dateTime.minute}";

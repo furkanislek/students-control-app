@@ -10,7 +10,6 @@ class TaskDetailsScreen extends StatefulWidget {
   const TaskDetailsScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _TaskDetailsScreenState createState() => _TaskDetailsScreenState();
 }
 
@@ -19,7 +18,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   late List<DateTime> _eventDates;
   final TextEditingController _titleContainer = TextEditingController();
 
-  // Define categories
   final List<List<dynamic>> _categories = [
     [Icons.abc, 'Soru Çözümü'],
     [Icons.book, 'Kitap Okuma'],
@@ -29,10 +27,8 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     [Icons.info_outline_sharp, 'Diğer'],
   ];
 
-  // Track selected category
   String _selectedCategory = '';
 
-  // Define time variables
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
 
@@ -58,7 +54,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     return DateFormat.Hm().format(dt);
   }
 
-  // Function to pick time
   Future<void> _pickTime({required bool isStart}) async {
     final now = TimeOfDay.now();
 
@@ -79,7 +74,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   }
 
   Future<void> _saveTaskToFirebase() async {
-    // Firebase'e veriyi eklemek için bir referans oluşturuyoruz
     final FirebaseAuth auth = FirebaseAuth.instance;
     final String uid = auth.currentUser!.uid;
     var uuid = Uuid();
@@ -103,7 +97,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       _endTime?.minute ?? 0,
     );
     DateTime endDateTimeUtc = endDateTime.toUtc().subtract(Duration(hours: 3));
-    // Veriyi yüklüyoruz
     await FirebaseFirestore.instance.collection('tasks').add({
       'date': _selectedDate.toUtc().subtract(Duration(hours: 3)),
       'title': _titleContainer.text,
@@ -173,7 +166,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Calendar Container
               Container(
                 height: 200,
                 width: double.infinity,
@@ -286,7 +278,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                 ],
               ),
 
-              // Category selection buttons
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -315,13 +306,13 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             showCheckmark: false,
                             avatarBorder: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  0), // Remove circular border
+                                  0), 
                               side:
-                                  BorderSide.none, // Make the border invisible
+                                  BorderSide.none, 
                             ),
-                            avatar: Icon(_categories[index][0]), // Use IconData
+                            avatar: Icon(_categories[index][0]), 
                             label: Text(
-                                _categories[index][1]), // Use String for label
+                                _categories[index][1]), 
                             labelStyle: TextStyle(
                               color: _selectedCategory == _categories[index][1]
                                   ? Colors.white

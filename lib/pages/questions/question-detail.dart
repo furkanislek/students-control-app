@@ -65,10 +65,10 @@ class _QuestionDetailState extends State<QuestionDetail> {
         setState(() {
           commentUserId = commentSnapshot.docs.first['commentUserId'];
         });
-        print('Comment User ID: $commentUserId'); 
+        print('Comment User ID: $commentUserId');
       } else {
         print('No comment found for commentId: $commentId');
-        return; 
+        return;
       }
 
       await _firestore
@@ -85,7 +85,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
     }
   }
 
-Future<void> updateUserPoint(bool isCorrectAnswer) async {
+  Future<void> updateUserPoint(bool isCorrectAnswer) async {
     var docRef = await _firestore
         .collection("users")
         .where("uid", isEqualTo: commentUserId)
@@ -114,7 +114,7 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
           if (point is Map<String, dynamic> &&
               point["questionId"] == widget.question["questionId"]) {
             pointToRemove = point;
-            break; 
+            break;
           }
         }
 
@@ -123,6 +123,24 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
             "userPoint": FieldValue.arrayRemove([pointToRemove])
           });
         }
+      }
+    } else {
+      print("docRef.docs.isEmpty");
+    }
+  }
+
+  Future<void> updateCommenCountPoint() async {
+    var docRef = await _firestore
+        .collection("questions")
+        .where("questionId", isEqualTo: widget.question['questionId'])
+        .limit(1)
+        .get();
+
+    if (docRef.docs.isNotEmpty) {
+      var comments = docRef.docs.first;
+      if (comments.exists) {
+        await comments.reference
+            .update({"commentCount": FieldValue.increment(1)});
       }
     } else {
       print("docRef.docs.isEmpty");
@@ -183,6 +201,7 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
         _isCommenting = false;
       });
     }
+    updateCommenCountPoint();
   }
 
   Future<void> _pickImage() async {
@@ -210,14 +229,14 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
             TextButton(
               child: const Text("İptal"),
               onPressed: () {
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: const Text("Sil"),
               onPressed: () async {
                 await _deleteComment(commentId);
-                Navigator.of(context).pop(); 
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -230,13 +249,11 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
     try {
       await _firestore
           .collection('comments')
-          .where('commentId',
-              isEqualTo: int.parse(
-                  commentId)) 
+          .where('commentId', isEqualTo: int.parse(commentId))
           .get()
           .then((QuerySnapshot querySnapshot) {
         querySnapshot.docs.forEach((doc) {
-          String docId = doc.id; 
+          String docId = doc.id;
 
           FirebaseFirestore.instance.collection('comments').doc(docId).delete();
         });
@@ -260,270 +277,388 @@ Future<void> updateUserPoint(bool isCorrectAnswer) async {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.sizeOf(context).width;
+    double height = MediaQuery.sizeOf(context).height;
+
     final currentUserUid = Auth().currentUser?.uid;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.question['title'] ?? 'Question Detail'),
+        backgroundColor: const Color(0xfff2f2f2),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 13.0),
-              child: Row(
+      body: Container(
+        color: const Color(0xfff2f2f2),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 13.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      getCategoryString(widget.question["category"]),
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    Text(
+                      DateFormat("d MMMM y - HH:mm", "tr_TR").format(
+                          DateTime.fromMicrosecondsSinceEpoch(
+                              widget.question['dateTime'])),
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    getCategoryString(widget.question["category"]) ,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  Text(
-                    DateFormat('dd-MM-yyyy HH:mm').format(
-                        DateTime.fromMicrosecondsSinceEpoch(
-                            widget.question['dateTime'])),
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(height: 8),
-                widget.question['image'] != null
-                    ? Image.memory(
-                        Base64Decoder().convert(widget.question['image']),
-                        fit: BoxFit.fill,
-                        height: 220,
-                        width: double.infinity,
-                      )
-                    : const SizedBox(
-                        height: 100, child: Placeholder()), // Placeholder
+                  const SizedBox(height: 8),
+                  widget.question['image'] != null
+                      ? Image.memory(
+                          Base64Decoder().convert(widget.question['image']),
+                          fit: BoxFit.fill,
+                          height: 220,
+                          width: double.infinity,
+                        )
+                      : const SizedBox(
+                          height: 100, child: Placeholder()), // Placeholder
 
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.question['title'] ?? 'No Title',
-                            textAlign: TextAlign.justify,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      Profile(userID: widget.question["uid"]),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              widget.question['nickName'] ?? "",
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              widget.question['title'] ?? 'No Title',
                               textAlign: TextAlign.justify,
                               style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Color.fromARGB(255, 76, 52, 117)),
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      Text(
-                        widget.question['description'] ?? 'No Information',
-                        textAlign: TextAlign.justify,
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.comment),
-              onPressed: () {
-                setState(() {
-                  _isCommenting = !_isCommenting;
-                });
-              },
-              label: Text(
-                _isCommenting ? 'Cevap yazmayı İptal Et' : 'Cevap Yaz',
-              ),
-            ),
-            if (_isCommenting) ...[
-              const SizedBox(height: 20),
-              TextField(
-                controller: _commentController,
-                decoration: const InputDecoration(
-                  labelText: 'Yorumunuzu yazın',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(color: Color.fromARGB(0, 8, 8, 70)),
-                  ),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: _pickImage,
-                    icon: const Icon(Icons.image),
-                    label: const Text('Resim Ekle'),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton.icon(
-                    onPressed: _submitComment,
-                    icon: const Icon(Icons.send),
-                    label: const Text('Yorumu Gönder'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const SizedBox(width: 10),
-                  if (_selectedImage != null)
-                    Image.file(
-                      _selectedImage!,
-                      height: 100,
-                      width: 100,
-                      fit: BoxFit.cover,
-                    ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 20),
-            ListView.builder(
-              padding: EdgeInsetsDirectional.symmetric(horizontal: 0.0),
-              itemCount: _comments.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final comment = _comments[index];
-                final isQuestionOwner =
-                    currentUserUid == widget.question['uid'];
-                final isCommentOwner =
-                    currentUserUid == comment["commentUserId"];
-                final isCorrectAnswer = comment['isCorrectAnswer'] == true;
-
-                return GestureDetector(
-                  onLongPress: isCommentOwner
-                      ? () => _showDeleteConfirmationDialog(
-                          context, comment["commentId"].toString())
-                      : null,
-                  child: Card(
-                    color: isCorrectAnswer
-                        ? Colors.green[50]
-                        : Colors.white, // Doğru cevapsa arka planı yeşil yap
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                        color: isCorrectAnswer
-                            ? Colors.green
-                            : Colors.grey, // Doğru cevapsa kenarlığı yeşil yap
-                        width: 2,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 10, right: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (comment['selectedImage'] != null) ...[
-                            const SizedBox(height: 5),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.memory(
-                                Base64Decoder()
-                                    .convert(comment['selectedImage']),
-                                fit: BoxFit.cover,
-                                width: double.infinity,
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        Profile(userID: widget.question["uid"]),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                widget.question['nickName'] ?? "",
+                                textAlign: TextAlign.justify,
+                                style: const TextStyle(
+                                    fontSize: 15,
+                                    color: Color.fromARGB(255, 76, 52, 117)),
                               ),
                             ),
                           ],
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  // Wrap Text in Expanded to prevent overflow
-                                  child: Text(
-                                    comment['comment'] ?? 'No Comment',
-                                    textAlign: TextAlign
-                                        .justify, // Optional: Justify the text
-                                    style: const TextStyle(fontSize: 16),
-                                    overflow: TextOverflow
-                                        .ellipsis, // Add overflow handling
-                                    maxLines:
-                                        10, // Adjust maxLines as per your UI requirements
-                                  ),
+                        ),
+                        const SizedBox(height: 16.0),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color.fromARGB(255, 255, 255, 255)
+                                          .withOpacity(0.3),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 3),
                                 ),
-                                if (isQuestionOwner)
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.check_box,
-                                      color: isCorrectAnswer
-                                          ? const Color.fromARGB(255, 2, 153,
-                                              39) // Gold color if true
-                                          : const Color.fromARGB(255, 219, 217,
-                                              217), // Grey color if false
-                                    ),
-                                    onPressed: () {
-                                      _markCorrectAnswer(
-                                          comment['commentId'].toString(),
-                                          isCorrectAnswer);
-                                    },
-                                  ),
                               ],
+                            ),
+                            child: Text(
+                              widget.question['description'] ??
+                                  'No Information',
+                              textAlign: TextAlign.justify,
+                              style: TextStyle(fontSize: 12),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5.0, horizontal: 12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  DateTime.fromMillisecondsSinceEpoch(
-                                          comment['dateTime'])
-                                      .toString(),
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                ),
-                                Text(
-                                  widget.question["nickName"],
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              ListView.builder(
+                padding: EdgeInsetsDirectional.symmetric(horizontal: 0.0),
+                itemCount: _comments.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final comment = _comments[index];
+                  final isQuestionOwner =
+                      currentUserUid == widget.question['uid'];
+                  final isCommentOwner =
+                      currentUserUid == comment["commentUserId"];
+                  final isCorrectAnswer = comment['isCorrectAnswer'] == true;
+
+                  return GestureDetector(
+                    onLongPress: isCommentOwner
+                        ? () => _showDeleteConfirmationDialog(
+                            context, comment["commentId"].toString())
+                        : null,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color.fromARGB(255, 192, 192, 192)
+                                .withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Card(
+                        color: isCorrectAnswer
+                            ? Colors.green[50]
+                            : Colors
+                                .white, // Doğru cevapsa arka planı yeşil yap
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: isCorrectAnswer
+                                ? Colors.green
+                                : Colors
+                                    .transparent, // Doğru cevapsa kenarlığı yeşil yap
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10, right: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (comment['selectedImage'] != null) ...[
+                                const SizedBox(height: 5),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.memory(
+                                    Base64Decoder()
+                                        .convert(comment['selectedImage']),
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                  ),
                                 ),
                               ],
-                            ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        comment['comment'] ?? 'No Comment',
+                                        textAlign: TextAlign.justify,
+                                        style: const TextStyle(fontSize: 16),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 10,
+                                      ),
+                                    ),
+                                    if (isQuestionOwner)
+                                      IconButton(
+                                        icon: Icon(
+                                          Icons.check_box,
+                                          color: isCorrectAnswer
+                                              ? const Color.fromARGB(255, 2,
+                                                  153, 39) // Gold color if true
+                                              : const Color.fromARGB(
+                                                  255, 219, 217, 217),
+                                        ),
+                                        onPressed: () {
+                                          _markCorrectAnswer(
+                                              comment['commentId'].toString(),
+                                              isCorrectAnswer);
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: 12.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      DateFormat("d MMMM, y", "tr_TR")
+                                          .format(DateTime
+                                              .fromMillisecondsSinceEpoch(
+                                                  comment['dateTime']))
+                                          .toString(),
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.black54),
+                                    ),
+                                    Text(
+                                      widget.question["nickName"],
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.black54),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 25),
+              Container(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(
+                    Icons.comment,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isCommenting = !_isCommenting;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8256DF),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15.0, horizontal: 100.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                  label: Text(
+                    _isCommenting ? 'Cevap yazmayı İptal Et' : 'Cevap Yaz',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              if (_isCommenting) ...[
+                const SizedBox(height: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Text(
+                        "Yorumunuzu Yazınız",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF282625),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFFFFF),
+                        borderRadius: BorderRadius.circular(15.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _commentController,
+                            textInputAction: TextInputAction.done,
+                            minLines: 2,
+                            maxLines: 2,
+                            keyboardType: TextInputType.text,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-            )
-          ],
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Container(
+                      width: width * 0.4,
+                      height: height * 0.054,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8256DF),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 1.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.image, color: Colors.white),
+                        label: const Text('Resim Ekle',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      width: width * 0.4,
+                      height: height * 0.054,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8256DF),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 1.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                        onPressed: _submitComment,
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        label: const Text('Yorumu Gönder',
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    const SizedBox(width: 10),
+                    if (_selectedImage != null)
+                      Image.file(
+                        _selectedImage!,
+                        height: 100,
+                        width: 100,
+                        fit: BoxFit.cover,
+                      ),
+                  ],
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

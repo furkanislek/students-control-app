@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:students_follow_app/pages/auth/login_register_page.dart';
-import 'package:students_follow_app/pages/home/menu-home.dart'; // Ana sayfa import edildi
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import edildi
+import 'package:students_follow_app/pages/home/menu-home.dart'; 
+import 'package:firebase_auth/firebase_auth.dart'; 
 import 'firebase_options.dart';
 
 void main() async {

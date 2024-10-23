@@ -32,12 +32,10 @@ class _InformationFormState extends State<InformationForm> {
       setState(() {
         _image = File(pickedFile.path);
       });
-      // Resmi base64'e dönüştür
       _base64Image = await _compressAndConvertToBase64(_image!);
     }
   }
 
-  // Resmi sıkıştırıp base64 formatına dönüştürme fonksiyonu
   Future<String?> _compressAndConvertToBase64(File imageFile) async {
     try {
       final List<int>? compressedImage =
@@ -57,7 +55,6 @@ class _InformationFormState extends State<InformationForm> {
     }
   }
 
-  // Tarih seçici
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -74,7 +71,6 @@ class _InformationFormState extends State<InformationForm> {
     }
   }
 
-  // Firestore'a kullanıcı bilgilerini yükleme fonksiyonu
   Future<void> _saveToFirestore() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final String uid = auth.currentUser!.uid;
@@ -119,7 +115,7 @@ class _InformationFormState extends State<InformationForm> {
         return Dialog(
           child: GestureDetector(
               onTap: () {
-                Navigator.of(context).pop(); // Resme tıklayınca dialogu kapatır
+                Navigator.of(context).pop();
               },
               child: CircleAvatar(
                 backgroundImage: FileImage(_image!),
@@ -151,8 +147,7 @@ class _InformationFormState extends State<InformationForm> {
                   ? GestureDetector(
                       onTap: _pickImage,
                       onLongPress: () {
-                        _showFullImage(
-                            _image!); // Resme tıklayınca tam ekran açılır
+                        _showFullImage(_image!);
                       },
                       child: CircleAvatar(
                         radius: 50,
@@ -231,7 +226,7 @@ class _InformationFormState extends State<InformationForm> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  _saveToFirestore(); // Kaydetme işlemi
+                  _saveToFirestore();
                 },
                 child: const Text("Kaydet"),
               ),

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:students_follow_app/pages/home/menu-home.dart';
 import 'package:students_follow_app/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,17 +46,14 @@ class _ProfileState extends State<Profile> {
   }
 
   void dispose() {
-    // Abonelikleri iptal et
     followersSubscription?.cancel();
     super.dispose();
   }
 
   void listenToUserFollowers() {
-    // Takip edilen kullanıcıların verisini dinle
     followersSubscription = FirebaseFirestore.instance
         .collection('followers')
-        .doc(widget
-            .userID) // Hangi kullanıcının takipçilerini dinleyecekseniz onu belirtin
+        .doc(widget.userID)
         .snapshots()
         .listen((snapshot) {
       if (snapshot.exists) {
@@ -64,12 +61,10 @@ class _ProfileState extends State<Profile> {
         final takipEdenler = data['takipEdenler'] ?? [];
         final takipEdilen = data['takipEdilen'] ?? [];
 
-        // Anlık olarak gelen takipçi ve takip edilen sayılarını güncelle
         setState(() {
           numberOfFollowers = takipEdenler.length;
           numberOfFollowed = takipEdilen.length;
 
-          // Auth ile aynı ID'ye sahip biri varsa takip durumunu güncelle
           isFollewed = takipEdenler
               .any((item) => item['userId'] == Auth().currentUser!.uid);
         });
@@ -114,6 +109,7 @@ class _ProfileState extends State<Profile> {
   Future<void> fetchUserInfo() async {
     try {
       final userInfos = await Auth().fetchUserInfo();
+      print(userInfos);
       if (userInfos != null && userInfos.isNotEmpty) {
         setState(() {
           authUserId = userInfos[0]['uid'];
@@ -138,12 +134,10 @@ class _ProfileState extends State<Profile> {
       if (userInfos != null && userInfos.isNotEmpty) {
         final takipEdenler = userInfos[0]['userPoint'] ?? [];
 
-        // Tüm userPoint değerlerini toplamak için bir değişken oluştur
         dynamic totalPoints = 0;
 
-        // Her bir öğeyi kontrol et ve userPoint değerini topla
         for (var point in takipEdenler) {
-          totalPoints += point['userPoint']; // Burada num'u int'e çeviriyoruz
+          totalPoints += point['userPoint'];
         }
 
         setState(() {
@@ -151,7 +145,7 @@ class _ProfileState extends State<Profile> {
           userName = userInfos[0]['name'];
           userNickName = userInfos[0]["nickName"];
           userId = userInfos[0]["uid"];
-          points = totalPoints; // Toplanan puanı burada ayarla
+          points = totalPoints;
         });
       } else {
         setState(() {
@@ -159,14 +153,13 @@ class _ProfileState extends State<Profile> {
           userNickName = "";
           userName = "";
           userId = "";
-          points = 0; // Eğer kullanıcı bulunamazsa puanı sıfırla
+          points = 0;
         });
       }
     } catch (e) {
       print("Error fetching user info: $e");
-      // Hata durumunda da puanı sıfırlayabilirsin
       setState(() {
-        points = 0; // Hata durumunda puanı sıfırla
+        points = 0;
       });
     }
   }
@@ -192,8 +185,8 @@ class _ProfileState extends State<Profile> {
           FirebaseFirestore.instance.collection('followers');
 
       await followersCollection.doc(authUserId).set({
-        "userId": authUserId, //test
-        "nickName": authUserNickName, //test
+        "userId": authUserId,
+        "nickName": authUserNickName,
         "timeStamp": Timestamp.now(),
         'takipEdilen': FieldValue.arrayUnion([
           {
@@ -226,15 +219,13 @@ class _ProfileState extends State<Profile> {
     try {
       DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
           .collection('followers')
-          .doc(authUserId) // Geçerli kullanıcının ID'sine göre belgeyi bul
+          .doc(authUserId)
           .get();
 
       List<dynamic> takipEdilenListesi = docSnapshot['takipEdilen'] ?? [];
 
-      // userId'yi içeren öğeyi takip edilen listesinden çıkar
       takipEdilenListesi.removeWhere((item) => item['userId'] == userId);
 
-      // Güncellenmiş takip edilen listesini Firestore'da güncelle
       await FirebaseFirestore.instance
           .collection('followers')
           .doc(authUserId)
@@ -244,15 +235,13 @@ class _ProfileState extends State<Profile> {
 
       DocumentSnapshot docSnapshot2 = await FirebaseFirestore.instance
           .collection('followers')
-          .doc(userId) // Geçerli kullanıcının ID'sine göre belgeyi bul
+          .doc(userId)
           .get();
 
       List<dynamic> takipEdenlerListesi = docSnapshot2['takipEdenler'] ?? [];
 
-      // userId'yi içeren öğeyi takip edilen listesinden çıkar
       takipEdenlerListesi.removeWhere((item) => item['userId'] == authUserId);
 
-      // Güncellenmiş takip edilen listesini Firestore'da güncelle
       await FirebaseFirestore.instance
           .collection('followers')
           .doc(userId)
@@ -267,17 +256,32 @@ class _ProfileState extends State<Profile> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFF2F2F2),
         title: (widget.userID == Auth().currentUser!.uid)
             ? const Text("Profil Bilgilerin")
             : const Text("Profil Bilgileri"),
+        actions: [
+          IconButton(
+            onPressed: () {
+              if (Navigator.canPop(context)) {
+                Navigator.of(context).pop();
+              } else {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => const MenuHome()));
+              }
+            },
+            icon: Icon(Icons.first_page),
+          ),
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: fetchUserInfo,
         child: Stack(
           children: [
             SvgPicture.asset(
-              "assets/icons/blog.svg", // Background SVG
+              "assets/icons/blog.svg",
               fit: BoxFit.cover,
               width: 250,
               height: double.infinity,
@@ -399,8 +403,7 @@ class ProfileInfoItem {
 }
 
 class _TopPortion extends StatelessWidget {
-  final String? profileImage; // Accept profileImage as a parameter
-
+  final String? profileImage;
   const _TopPortion({Key? key, this.profileImage}) : super(key: key);
 
   @override
@@ -440,7 +443,7 @@ class _TopPortion extends StatelessWidget {
     try {
       return base64Decode(base64String);
     } catch (e) {
-      return null; // Return null in case of error
+      return null;
     }
   }
 }
