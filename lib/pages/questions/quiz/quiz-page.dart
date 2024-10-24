@@ -41,9 +41,13 @@ class _QuizPageState extends State<QuizPage> {
         Timestamp endTimestamp = quizData['endDate'];
         DateTime startDate = startTimestamp.toDate();
         DateTime endDate = endTimestamp.toDate();
-
+        print("object");
         if (now.isAfter(startDate) && now.isBefore(endDate)) {
+          print(
+              "now.isAfter(startDate) && now.isBefore(endDate) ${now.isBefore(startDate)} ${now.isBefore(endDate)}");
           for (var item in userPoints) {
+            print(" item : ${item["questionId"]}");
+            print(" quizData : ${quizData["quizId"]}");
             if (item["questionId"] == quizData["quizId"]) {
               setState(() {
                 isExecuted = true;
@@ -54,6 +58,10 @@ class _QuizPageState extends State<QuizPage> {
           setState(() {
             questions = List<Map<String, dynamic>>.from(quizData['question']);
             quizId = quizData["quizId"];
+          });
+        } else {
+          setState(() {
+            isExecuted = true;
           });
         }
       }
@@ -66,18 +74,18 @@ class _QuizPageState extends State<QuizPage> {
       print("user Info : $userInfo");
       final userPoints = userInfo![0]["userPoint"] ?? [];
 
-      for (var item in userPoints) {
-        print("item $item");
-        var quizId2 = questions;
-        if ((item["questionId"] == quizId2) || quizId == null) {
-          setState(() {
-            isExecuted = true;
-          });
-          break;
+      if (quizId != null) {
+        for (var item in userPoints) {
+          if (item["questionId"] == quizId) {
+            setState(() {
+              isExecuted = true;
+            });
+            break;
+          }
         }
       }
     } catch (e) {
-      print("Execute yaparken sorun oldu $e");
+      print("Execute yaparken sorun oldu: $e");
     }
   }
 
@@ -145,9 +153,6 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("------------------------------------------");
-    print(isExecuted);
-    print("------------------------------------------");
     return Scaffold(
       appBar: GradientAppBar(
         title: const Text('Quiz'),
@@ -184,8 +189,8 @@ class _QuizPageState extends State<QuizPage> {
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                     colors: [
-                      Colors.blue,
-                      Colors.red,
+                      Color(0xFF2196F3),
+                      Color(0xFFF44336),
                     ],
                   ),
                 ),
@@ -229,8 +234,8 @@ class _QuizPageState extends State<QuizPage> {
                                                       ['correctAnswer']
                                               ? Colors.green
                                               : Colors.red)
-                                          : const Color.fromARGB(255, 255, 254,
-                                              254), 
+                                          : const Color.fromARGB(
+                                              255, 255, 254, 254),
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(8.0),

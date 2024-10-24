@@ -9,20 +9,34 @@ class Auth {
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
 
-  // Register
   Future<void> registerUser(
       {required String email, required String password}) async {
-    await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email, password: password);
+    UserCredential userCredential =
+        await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    await userCredential.user?.sendEmailVerification();
+
+    await signOut();
   }
-  // Login
 
   Future<void> signIn({required String email, required String password}) async {
-    await _firebaseAuth.signInWithEmailAndPassword(
-        email: email, password: password);
+    UserCredential userCredential =
+        await _firebaseAuth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    if (userCredential.user?.emailVerified == false) {
+      await _firebaseAuth.signOut();
+      throw FirebaseAuthException(
+        code: 'email-not-verified',
+        message: 'Lütfen giriş yapmadan önce e-posta adresinizi doğrulayın.',
+      );
+    }
   }
 
-  // Sign out
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
   }
