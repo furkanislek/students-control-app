@@ -59,11 +59,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final tasks = await _firestore
         .collection('tasks')
         .where('userId', isEqualTo: user.uid)
+        .where('isActive', isEqualTo: true)
         .get();
     final now = DateTime.now();
-    print(tasks.docs.length);
     for (var doc in tasks.docs) {
-      print(doc.data());
       final taskData = doc.data();
 
       if (taskData["isCompleted"]) {
@@ -192,7 +191,66 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     }
   }
 
+  Future<void> _deleteTaskCompletion(dynamic task) async {
+    try {
+      var docRef = await _firestore
+          .collection("tasks")
+          .where("taskId", isEqualTo: task['taskId'])
+          .limit(1)
+          .get();
+
+      if (docRef.docs.isNotEmpty) {
+        var taskDoc = docRef.docs.first;
+        await taskDoc.reference.update({"isActive": false});
+      } else {
+        print("Task Bulunamadı");
+      }
+
+      setState(() {
+        _expiredTasks.clear();
+        _activeTasks.clear();
+        _upcomingTasks.clear();
+      });
+      await _fetchTasks();
+    } catch (e) {
+      print("Görevi güncellerken hata: $e");
+    }
+  }
+
+  void _showDeleteConfirmationDialog(Map<String, dynamic> task) {
+    double height = MediaQuery.sizeOf(context).height;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            "Gerçekten Planı Silecek Misin? 😟",
+            style: TextStyle(fontSize: height / 46.85),
+          ),
+          content: const Text("Bu planı silmek istediğinize emin misiniz?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("İptal"),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _deleteTaskCompletion(task);
+              },
+              child: const Text("Sil"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildTaskTile(Map<String, dynamic> task, Color color) {
+    double height = MediaQuery.sizeOf(context).height;
+    print(height);
     final Timestamp? startTimestamp = task['start_time'] as Timestamp?;
     final Timestamp? endTimestamp = task['end_time'] as Timestamp?;
     final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -201,10 +259,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final int endDate = endTimestamp!.millisecondsSinceEpoch;
 
     final int remainingTime = endDate - currentTime;
-    final int hours = (remainingTime ~/ (1000 * 60 * 60)).abs();
-    final int minutes = (remainingTime ~/ (1000 * 60)).abs() % 60;
+    int hours = (remainingTime ~/ (1000 * 60 * 60)).abs();
+    int minutes = (remainingTime ~/ (1000 * 60)).abs() % 60;
     double progressPercentage =
         _calculateProgress(currentTime, startDate, endDate);
+
+    bool isExpired = _expiredTasks.contains(task);
+
+    if (isExpired) {
+      hours = 0;
+      minutes = 0;
+    }
 
     IconData _getCategoryIcon(String category) {
       final List<List<dynamic>> _categories = [
@@ -261,73 +326,78 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           await _updateTaskCompletion(task['taskId'], isCompleted);
         }
       },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: cardColor,
-              width: 2.0,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
+      child: GestureDetector(
+        onLongPress: () {
+          _showDeleteConfirmationDialog(task);
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: cardColor,
+                width: 2.0,
               ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(taskIcon, color: iconColor),
-                        const SizedBox(width: 8),
-                        Text(task['title'],
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    Text(
-                      "$hours Saat $minutes Dakika",
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ],
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      const Color.fromARGB(255, 255, 255, 255).withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
                 ),
-                const SizedBox(height: 8),
-                Text("Kategori: ${task['category']}"),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: Stack(
-                    alignment: Alignment.center,
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      LinearProgressIndicator(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(20)),
-                        value: progressPercentage / 100,
-                        backgroundColor: Colors.grey[300],
-                        minHeight: 20,
-                        valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                      Row(
+                        children: [
+                          Icon(taskIcon, color: iconColor),
+                          const SizedBox(width: 8),
+                          Text(task['title'],
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                        ],
                       ),
                       Text(
-                        "${progressPercentage.toStringAsFixed(2)}%",
-                        style: const TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
+                        "$hours Saat $minutes Dakika",
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Text("Kategori: ${task['category']}"),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        LinearProgressIndicator(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(20)),
+                          value: progressPercentage / 100,
+                          backgroundColor: Colors.grey[300],
+                          minHeight: 20,
+                          valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                        ),
+                        Text(
+                          "${progressPercentage.toStringAsFixed(2)}%",
+                          style: const TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
