@@ -160,12 +160,12 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
     });
   }
 
-  Widget _buildImageButtonOrImage() {
+  Widget _buildImageButtonOrImage(double heightTop) {
     if (_base64Image != null && _imageFile != null) {
       return GestureDetector(
         onTap: uploadQuestionImage,
         child: Container(
-          height: 150,
+          height: heightTop,
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey, width: 2),
             borderRadius: BorderRadius.circular(15.0),
@@ -178,7 +178,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
       );
     } else {
       return SizedBox(
-        height: 150,
+        height: heightTop,
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: uploadQuestionImage,
@@ -201,17 +201,21 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
+    double width = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       bottomNavigationBar: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 10),
+          padding: EdgeInsets.symmetric(
+              vertical: height / 44.5, horizontal: width / 41.1),
           child: ElevatedButton.icon(
             onPressed: uploadQuestionToFirestore,
             icon: const Icon(Icons.cloud_upload, color: Colors.white),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF8256DF),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 15.0, horizontal: 100.0),
+              padding: EdgeInsets.symmetric(
+                  vertical: height / 59.33, horizontal: width / 4.1),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),
@@ -230,9 +234,9 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              _buildImageButtonOrImage(),
-              const SizedBox(height: 20),
+              SizedBox(height: height / 44.5),
+              _buildImageButtonOrImage(height / 5.95),
+              SizedBox(height: height / 44.5),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -247,7 +251,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: height / 44.5),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
@@ -266,9 +270,9 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 10),
+                        SizedBox(height: height / 89),
                         SizedBox(
-                          height: 40,
+                          height: height / 22.5,
                           child: TextField(
                             controller: _titleController,
                             textInputAction: TextInputAction.done,
@@ -288,7 +292,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 15),
+              SizedBox(height: height / 59.33),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -303,7 +307,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: height / 89),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
@@ -342,15 +346,15 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: height / 44.5),
               SizedBox(
-                height: 45,
+                height: height / 19.78,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: QuestionCategory.values.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                      padding: EdgeInsets.only(right: width / 34),
                       child: ChoiceChip(
                         showCheckmark: false,
                         avatarBorder: RoundedRectangleBorder(

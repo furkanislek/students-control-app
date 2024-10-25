@@ -40,8 +40,11 @@ class _YourQuestionsState extends State<YourQuestions> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
+    double width = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
-      backgroundColor: Color(0xfff2f2f2),
+      backgroundColor: const Color(0xfff2f2f2),
       body: FutureBuilder<List<Map<String, dynamic>>?>(
         future: _fetchUserQuestions(),
         builder: (context, snapshot) {
@@ -60,7 +63,7 @@ class _YourQuestionsState extends State<YourQuestions> {
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                SvgPicture.asset("assets/icons/login.svg", height: 300),
+                SvgPicture.asset("assets/icons/login.svg", height: height / 30),
                 const Text("Henüz Sorun Yok")
               ],
             ));
@@ -81,10 +84,10 @@ class _YourQuestionsState extends State<YourQuestions> {
                   );
                 },
                 child: Card(
-                  margin:
-                      const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                  margin: EdgeInsets.symmetric(
+                      vertical: height / 89, horizontal: width / 27.4),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -93,15 +96,12 @@ class _YourQuestionsState extends State<YourQuestions> {
                                 const Base64Decoder()
                                     .convert(question['image']),
                                 fit: BoxFit.cover,
-                                height: 220,
+                                height: height / 4.045,
                                 width: double.infinity,
                               )
-                            : const SizedBox(
-                                height: 100,
-                                child: Placeholder()), 
-
-                        const SizedBox(height: 8),
-
+                            : SizedBox(
+                                height: height / 8.9, child: Placeholder()),
+                        SizedBox(height: height / 111),
                         Text(
                           question['title'] ?? 'No Title',
                           style: const TextStyle(
@@ -109,7 +109,6 @@ class _YourQuestionsState extends State<YourQuestions> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(height: 4),
                         Text(
                           question['description'] ?? 'No Information',
@@ -117,7 +116,6 @@ class _YourQuestionsState extends State<YourQuestions> {
                           maxLines: 4,
                           overflow: TextOverflow.ellipsis,
                         ),
-
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

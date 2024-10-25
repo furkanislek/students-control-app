@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:Tudora/pages/Leaderboard/leaderboard.dart';
+import 'package:flutter/material.dart';
 import 'package:Tudora/pages/auth/login_register_page.dart';
 import 'package:Tudora/pages/home/home.dart';
 import 'package:Tudora/pages/questions/add_new_question.dart';
@@ -68,7 +68,7 @@ class _MenuState extends State<Menu> {
     const Home(),
     const AddNewQuestion(),
     QuizPage(),
-    LeaderboardPage(),
+    const Leaderboard(),
   ];
 
   @override

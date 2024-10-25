@@ -1,3 +1,5 @@
+import 'package:Tudora/pages/home/menu-home.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,12 +19,21 @@ class _QuizPageState extends State<QuizPage> {
   String? userId = FirebaseAuth.instance.currentUser?.uid;
   int currentQuestionIndex = 0;
   bool isExecuted = false;
+  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
     fetchActiveQuiz();
     checkIsExcecuted();
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchActiveQuiz() async {
@@ -41,13 +52,8 @@ class _QuizPageState extends State<QuizPage> {
         Timestamp endTimestamp = quizData['endDate'];
         DateTime startDate = startTimestamp.toDate();
         DateTime endDate = endTimestamp.toDate();
-        print("object");
         if (now.isAfter(startDate) && now.isBefore(endDate)) {
-          print(
-              "now.isAfter(startDate) && now.isBefore(endDate) ${now.isBefore(startDate)} ${now.isBefore(endDate)}");
           for (var item in userPoints) {
-            print(" item : ${item["questionId"]}");
-            print(" quizData : ${quizData["quizId"]}");
             if (item["questionId"] == quizData["quizId"]) {
               setState(() {
                 isExecuted = true;
@@ -71,7 +77,6 @@ class _QuizPageState extends State<QuizPage> {
   Future<void> checkIsExcecuted() async {
     try {
       final userInfo = await Auth().fetchUserInfoByUid(Auth().currentUser!.uid);
-      print("user Info : $userInfo");
       final userPoints = userInfo![0]["userPoint"] ?? [];
 
       if (quizId != null) {
@@ -148,7 +153,15 @@ class _QuizPageState extends State<QuizPage> {
       SnackBar(content: Text('Tüm cevaplarınız gönderildi!')),
     );
 
-    Navigator.pop(context);
+    _confettiController.play();
+
+    Future.delayed(const Duration(seconds: 15), () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => MenuHome()),
+        (route) => false,
+      );
+    });
   }
 
   @override
@@ -163,110 +176,131 @@ class _QuizPageState extends State<QuizPage> {
           ],
         ),
       ),
-      body: isExecuted
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Testi Çözdüğün İçin Teşekkürler 🤗 \nBir Sonraki Quizde Başarılar 🎉",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SvgPicture.asset(
-                    'assets/quiz/quiz.svg',
-                  ),
-                ],
-              ),
-            )
-          : Center(
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      Color(0xFF2196F3),
-                      Color(0xFFF44336),
+      body: Stack(
+        children: [
+          isExecuted
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Testi Çözdüğün İçin Teşekkürler 🤗 \nBir Sonraki Quizde Başarılar 🎉",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SvgPicture.asset(
+                        'assets/quiz/quiz.svg',
+                      ),
                     ],
                   ),
-                ),
-                child: questions.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : Card(
-                        margin: const EdgeInsets.all(10),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                questions[currentQuestionIndex]
-                                        ['questionText'] ??
-                                    'Soru yok',
-                                style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 25),
-                              ...((questions[currentQuestionIndex]['answers']
-                                      as Map<String, dynamic>)
-                                  .entries
-                                  .map((entry) {
-                                String answerKey = entry.key;
-                                String answerValue = entry.value;
-                                bool isSelected = selectedAnswers[
-                                        questions[currentQuestionIndex]
-                                            ['questionId']] ==
-                                    answerValue;
-
-                                return SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isSelected
-                                          ? (answerValue ==
-                                                  questions[
-                                                          currentQuestionIndex]
-                                                      ['correctAnswer']
-                                              ? Colors.green
-                                              : Colors.red)
-                                          : const Color.fromARGB(
-                                              255, 255, 254, 254),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      if (selectedAnswers[
-                                              questions[currentQuestionIndex]
-                                                  ['questionId']] ==
-                                          null) {
-                                        submitAnswer(
-                                          questions[currentQuestionIndex]
-                                              ['questionId'],
-                                          answerValue,
-                                          questions[currentQuestionIndex]
-                                              ['correctAnswer'],
-                                          questions[currentQuestionIndex]
-                                              ['points'],
-                                        );
-                                      }
-                                    },
-                                    child: Text('$answerKey: $answerValue'),
-                                  ),
-                                );
-                              })).toList(),
-                            ],
-                          ),
-                        ),
+                )
+              : Center(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Color(0xFF2196F3),
+                          Color(0xFFF44336),
+                        ],
                       ),
-              ),
+                    ),
+                    child: questions.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : Card(
+                            margin: const EdgeInsets.all(10),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    questions[currentQuestionIndex]
+                                            ['questionText'] ??
+                                        'Soru yok',
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 25),
+                                  ...((questions[currentQuestionIndex]
+                                          ['answers'] as Map<String, dynamic>)
+                                      .entries
+                                      .map((entry) {
+                                    String answerKey = entry.key;
+                                    String answerValue = entry.value;
+                                    bool isSelected = selectedAnswers[
+                                            questions[currentQuestionIndex]
+                                                ['questionId']] ==
+                                        answerValue;
+
+                                    return SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: isSelected
+                                              ? (answerValue ==
+                                                      questions[
+                                                              currentQuestionIndex]
+                                                          ['correctAnswer']
+                                                  ? Colors.green
+                                                  : Colors.red)
+                                              : const Color.fromARGB(
+                                                  255, 255, 254, 254),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          if (selectedAnswers[questions[
+                                                      currentQuestionIndex]
+                                                  ['questionId']] ==
+                                              null) {
+                                            submitAnswer(
+                                              questions[currentQuestionIndex]
+                                                  ['questionId'],
+                                              answerValue,
+                                              questions[currentQuestionIndex]
+                                                  ['correctAnswer'],
+                                              questions[currentQuestionIndex]
+                                                  ['points'],
+                                            );
+                                          }
+                                        },
+                                        child: Text('$answerKey: $answerValue'),
+                                      ),
+                                    );
+                                  })).toList(),
+                                ],
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: false,
+              numberOfParticles: 50,
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple
+              ],
             ),
+          ),
+        ],
+      ),
     );
   }
 }

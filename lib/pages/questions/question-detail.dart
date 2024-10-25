@@ -100,7 +100,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
           "userPoint": FieldValue.arrayUnion([
             {
               'dateTime': DateTime.now().millisecondsSinceEpoch,
-              "userPoint": 10, 
+              "userPoint": 10,
               "questionId": widget.question["questionId"]
             }
           ])
@@ -323,13 +323,11 @@ class _QuestionDetailState extends State<QuestionDetail> {
                       ? Image.memory(
                           Base64Decoder().convert(widget.question['image']),
                           fit: BoxFit.fill,
-                          height: 220,
+                          height: height / 4,
                           width: double.infinity,
                         )
-                      : const SizedBox(
-                          height: 100, child: Placeholder()),
-
-                  const SizedBox(height: 8),
+                      : SizedBox(height: height / 8.9, child: Placeholder()),
+                  SizedBox(height: height / 110),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 1.0),
                     child: Column(
@@ -366,7 +364,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16.0),
+                        SizedBox(height: height / 55.625),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
@@ -386,7 +384,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                               widget.question['description'] ??
                                   'No Information',
                               textAlign: TextAlign.justify,
-                              style: TextStyle(fontSize: 12),
+                              style: const TextStyle(fontSize: 12),
                             ),
                           ),
                         ),
@@ -395,9 +393,9 @@ class _QuestionDetailState extends State<QuestionDetail> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: height / 44.5),
               ListView.builder(
-                padding: EdgeInsetsDirectional.symmetric(horizontal: 0.0),
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 0.0),
                 itemCount: _comments.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -427,22 +425,20 @@ class _QuestionDetailState extends State<QuestionDetail> {
                         ],
                       ),
                       child: Card(
-                        color: isCorrectAnswer
-                            ? Colors.green[50]
-                            : Colors
-                                .white,
+                        color:
+                            isCorrectAnswer ? Colors.green[50] : Colors.white,
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
                             color: isCorrectAnswer
                                 ? Colors.green
-                                : Colors
-                                    .transparent, 
+                                : Colors.transparent,
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 10, right: 10),
+                          padding: EdgeInsets.only(
+                              top: height / 89, right: width / 41),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -459,8 +455,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                                 ),
                               ],
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: width / 34.25),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -479,8 +475,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                                         icon: Icon(
                                           Icons.check_box,
                                           color: isCorrectAnswer
-                                              ? const Color.fromARGB(255, 2,
-                                                  153, 39) 
+                                              ? const Color.fromARGB(
+                                                  255, 2, 153, 39)
                                               : const Color.fromARGB(
                                                   255, 219, 217, 217),
                                         ),
@@ -494,8 +490,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 12.0),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 5.0, horizontal: width / 34.25),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -525,8 +521,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                   );
                 },
               ),
-              const SizedBox(height: 25),
-              Container(
+              SizedBox(height: height / 35.6),
+              SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(
@@ -540,8 +536,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8256DF),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 15.0, horizontal: 100.0),
+                    padding: EdgeInsets.symmetric(
+                        vertical: height / 59.33, horizontal: width / 4.1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.0),
                     ),
@@ -553,7 +549,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                 ),
               ),
               if (_isCommenting) ...[
-                const SizedBox(height: 20),
+                SizedBox(height: height / 44.5),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -568,7 +564,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: height / 89),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16.0),
@@ -587,7 +583,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(height: 10),
+                          SizedBox(height: height / 89),
                           TextField(
                             controller: _commentController,
                             textInputAction: TextInputAction.done,
@@ -600,11 +596,11 @@ class _QuestionDetailState extends State<QuestionDetail> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: height / 89),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Container(
+                    SizedBox(
                       width: width * 0.4,
                       height: height * 0.054,
                       child: ElevatedButton.icon(
@@ -622,8 +618,8 @@ class _QuestionDetailState extends State<QuestionDetail> {
                             style: TextStyle(color: Colors.white)),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Container(
+                    SizedBox(height: height / 89),
+                    SizedBox(
                       width: width * 0.4,
                       height: height * 0.054,
                       child: ElevatedButton.icon(
@@ -643,20 +639,20 @@ class _QuestionDetailState extends State<QuestionDetail> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: height / 89),
                 Row(
                   children: [
-                    const SizedBox(width: 10),
                     if (_selectedImage != null)
                       Image.file(
                         _selectedImage!,
-                        height: 100,
-                        width: 100,
+                        height: height / 5,
+                        width: width / 1.2,
                         fit: BoxFit.cover,
                       ),
                   ],
                 ),
               ],
+              SizedBox(height: height / 89),
             ],
           ),
         ),

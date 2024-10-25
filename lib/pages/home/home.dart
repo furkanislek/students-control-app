@@ -250,7 +250,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget _buildTaskTile(Map<String, dynamic> task, Color color) {
     double height = MediaQuery.sizeOf(context).height;
-    print(height);
+    double width = MediaQuery.sizeOf(context).width;
     final Timestamp? startTimestamp = task['start_time'] as Timestamp?;
     final Timestamp? endTimestamp = task['end_time'] as Timestamp?;
     final int currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -297,14 +297,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ? const Color.fromARGB(255, 0, 107, 23)
         : const Color.fromARGB(255, 187, 170, 170);
     final Color iconColor =
-        isCompleted ? Color.fromARGB(255, 131, 185, 119) : color;
+        isCompleted ? const Color.fromARGB(255, 131, 185, 119) : color;
 
     return Dismissible(
       key: Key(task['taskId']),
       background: Container(
         color: !isCompleted
             ? const Color.fromARGB(255, 131, 185, 119)
-            : Colors.red,
+            : const Color(0xFFEB7E5C),
         padding: const EdgeInsets.symmetric(horizontal: 20),
         alignment: Alignment.center,
         child:
@@ -331,7 +331,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           _showDeleteConfirmationDialog(task);
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          padding: EdgeInsets.symmetric(
+              horizontal: width / 25.69, vertical: height / 110),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -350,7 +351,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               ],
             ),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: EdgeInsets.symmetric(
+                  horizontal: width / 34.25, vertical: height / 74.17),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -360,21 +362,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       Row(
                         children: [
                           Icon(taskIcon, color: iconColor),
-                          const SizedBox(width: 8),
+                          SizedBox(width: width / 51),
                           Text(task['title'],
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                              style: TextStyle(
+                                  fontSize: height / 55.625,
+                                  fontWeight: FontWeight.bold)),
                         ],
                       ),
                       Text(
                         "$hours Saat $minutes Dakika",
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(fontSize: height / 74.17),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: height / 110),
                   Text("Kategori: ${task['category']}"),
-                  const SizedBox(height: 8),
+                  SizedBox(height: height / 110),
                   SizedBox(
                     width: double.infinity,
                     child: Stack(
@@ -385,7 +388,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                               const BorderRadius.all(Radius.circular(20)),
                           value: progressPercentage / 100,
                           backgroundColor: Colors.grey[300],
-                          minHeight: 20,
+                          minHeight: height / 39,
                           valueColor: AlwaysStoppedAnimation<Color>(iconColor),
                         ),
                         Text(

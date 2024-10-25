@@ -96,9 +96,13 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       _endTime?.hour ?? 0,
       _endTime?.minute ?? 0,
     );
+    if (endDateTime.isBefore(startDateTime)) {
+      endDateTime = endDateTime.add(const Duration(days: 1)); // Add one day
+    }
+
     DateTime endDateTimeUtc = endDateTime.toUtc().subtract(Duration(hours: 3));
     await FirebaseFirestore.instance.collection('tasks').add({
-      'date': _selectedDate.toUtc().subtract(Duration(hours: 3)),
+      'date': _selectedDate.toUtc(),
       'title': _titleContainer.text,
       'category': _selectedCategory,
       'start_time': startDateTimeUtc,
@@ -113,6 +117,14 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Hedef başarıyla kaydedildi')),
       );
+
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MenuHome()),
+          (route) => false,
+        );
+      });
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Hata: $error')),

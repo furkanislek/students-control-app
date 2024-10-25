@@ -28,6 +28,7 @@ class _AllQuestionsState extends State<AllQuestions> {
 
   @override
   Widget build(BuildContext context) {
+    double height = MediaQuery.sizeOf(context).height;
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       body: FutureBuilder<List<Map<String, dynamic>>>(
@@ -73,7 +74,7 @@ class _AllQuestionsState extends State<AllQuestions> {
                       const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                        const EdgeInsets.symmetric(vertical: 1, horizontal: 5),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -82,16 +83,11 @@ class _AllQuestionsState extends State<AllQuestions> {
                             ? Image.memory(
                                 Base64Decoder().convert(question['image']),
                                 fit: BoxFit.fill,
-                                height: 120, 
+                                height: height / 7.42,
                                 width: double.infinity,
                               )
-                            : const SizedBox(
-                                height: 120,
-                                child:
-                                    Placeholder()), 
-
-                        const SizedBox(height: 8),
-
+                            : SizedBox(
+                                height: height / 7.42, child: Placeholder()),
                         Text(
                           question['title'] ?? 'No Title',
                           style: const TextStyle(
@@ -99,14 +95,11 @@ class _AllQuestionsState extends State<AllQuestions> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
-                        const SizedBox(height: 4),
-
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
-                              DateFormat('dd/MM/yyyy').format(
+                              DateFormat('d MMMM yyyy', 'tr_TR').format(
                                   DateTime.fromMillisecondsSinceEpoch(
                                       question['dateTime'])),
                               style: const TextStyle(
