@@ -1,3 +1,4 @@
+import 'package:Tudora/pages/timer/set-timer.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:Tudora/pages/Plans/plans.dart';
@@ -73,22 +74,45 @@ class _SummaryProgressState extends State<SummaryProgress> {
             ),
             Column(
               children: [
-                IconButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const TaskDetailsScreen()));
-                    },
-                    icon: const Icon(
-                      Icons.add_circle_sharp,
-                      fill: 0.5,
-                      size: 50.5,
-                      grade: -25,
-                      color: Color(0xFF8256DF),
-                    ))
+                Column(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const TaskDetailsScreen()));
+                        },
+                        icon: const Icon(
+                          Icons.add_circle_sharp,
+                          fill: 0.5,
+                          size: 50.5,
+                          grade: -25,
+                          color: Color(0xFF8256DF),
+                        ))
+                  ],
+                ),
+                Column(
+                  children: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SetTimer()));
+                        },
+                        icon: const Icon(
+                          Icons.alarm,
+                          fill: 0.5,
+                          size: 50.5,
+                          grade: -25,
+                          color: Color(0xFF8256DF),
+                        ))
+                  ],
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),

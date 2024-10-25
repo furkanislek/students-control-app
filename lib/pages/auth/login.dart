@@ -56,7 +56,6 @@ class _LoginState extends State<Login> {
       }
     } on FirebaseAuthException catch (e) {
       String? errorText;
-      print("e.code ${e.code}");
       switch (e.code) {
         case 'invalid-email':
           errorText = "Geçersiz e-posta adresi girdiniz.";

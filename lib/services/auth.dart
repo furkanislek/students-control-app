@@ -5,6 +5,8 @@ class Auth {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  dynamic followedUserIds;
+
   User? get currentUser => _firebaseAuth.currentUser;
 
   Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
@@ -87,6 +89,32 @@ class Auth {
           .toList();
 
       return userFollowers;
+    }
+  }
+
+  Future<dynamic> fetchFollowedUsers() async {
+    final currentUserID = Auth().currentUser!.uid;
+
+    QuerySnapshot followersSnapshot = await FirebaseFirestore.instance
+        .collection('followers')
+        .where("userId", isEqualTo: currentUserID)
+        .get();
+
+    if (followersSnapshot.docs.isNotEmpty) {
+      List<Map<String, dynamic>> followersSnapshotDoc = followersSnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
+      var takipEdilenList = followersSnapshotDoc[0]["takipEdilen"] as List;
+      followedUserIds = [];
+      followedUserIds.add({"uid": currentUserID});
+      for (var item in takipEdilenList) {
+        followedUserIds
+            .add({"uid": item["userId"]}); // Use colon to create a map
+      }
+      return followedUserIds;
+    } else {
+      return [];
     }
   }
 }

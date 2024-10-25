@@ -1,6 +1,6 @@
+import 'package:Tudora/pages/Leaderboard/leaderboard.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:Tudora/pages/Leaderboard/leaderboard.dart';
 import 'package:Tudora/pages/Profile/profile.dart';
 import 'package:Tudora/pages/home/home.dart';
 import 'package:Tudora/pages/questions/add_new_question.dart';
@@ -24,7 +24,7 @@ class _MenuHomeState extends State<MenuHome> {
     super.initState();
     userID = Auth().currentUser!.uid;
     _pages = [
-      LeaderboardPage(),
+      Leaderboard(),
       Profile(userID: userID),
       const Home(),
       const AddNewQuestion(),
