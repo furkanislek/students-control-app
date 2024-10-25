@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:students_follow_app/pages/Plans/plans.dart';
+import 'package:Tudora/pages/Plans/plans.dart';
 
 class SummaryProgress extends StatefulWidget {
   final int finishedLength;
@@ -26,7 +26,8 @@ class _SummaryProgressState extends State<SummaryProgress> {
         ? widget.isCompletedLength / widget.tasksLength
         : 0;
     return Padding(
-      padding: const EdgeInsets.only(left: 24.0, right: 32.0, top: 15, bottom: 15),
+      padding:
+          const EdgeInsets.only(left: 24.0, right: 32.0, top: 15, bottom: 15),
       child: SizedBox(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

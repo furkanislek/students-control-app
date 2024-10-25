@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/questions/question-detail.dart';
+import 'package:Tudora/pages/questions/question-detail.dart';
 
 class AllQuestions extends StatefulWidget {
   const AllQuestions({super.key});

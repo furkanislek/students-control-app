@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/Profile/profile.dart';
-import 'package:students_follow_app/services/auth.dart';
-import 'package:students_follow_app/utils/category-utils.dart';
+import 'package:Tudora/pages/Profile/profile.dart';
+import 'package:Tudora/services/auth.dart';
+import 'package:Tudora/utils/category-utils.dart';
 
 class QuestionDetail extends StatefulWidget {
   final Map<String, dynamic> question;

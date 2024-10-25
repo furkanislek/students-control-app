@@ -1,5 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:students_follow_app/main.dart';
+import 'package:Tudora/main.dart';
 
 class FirebaseApi {
   final _firebaseMessaging = FirebaseMessaging.instance;

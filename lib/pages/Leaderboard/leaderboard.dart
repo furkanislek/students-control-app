@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:students_follow_app/pages/Profile/profile.dart';
+import 'package:Tudora/pages/Profile/profile.dart';
 
 class User {
   String name;

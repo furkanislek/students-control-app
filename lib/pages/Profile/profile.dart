@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:students_follow_app/pages/home/menu-home.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/pages/home/menu-home.dart';
+import 'package:Tudora/services/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

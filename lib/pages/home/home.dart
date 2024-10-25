@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:students_follow_app/components/home/summary-progress.dart';
-import 'package:students_follow_app/pages/auth/login_register_page.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/components/home/summary-progress.dart';
+import 'package:Tudora/pages/auth/login_register_page.dart';
+import 'package:Tudora/services/auth.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

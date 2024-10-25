@@ -6,9 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:students_follow_app/pages/questions/question-enum.dart';
-import 'package:students_follow_app/services/auth.dart';
-import 'package:students_follow_app/utils/category-utils.dart';
+import 'package:Tudora/pages/questions/question-enum.dart';
+import 'package:Tudora/services/auth.dart';
+import 'package:Tudora/utils/category-utils.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewQuestionPage extends StatefulWidget {

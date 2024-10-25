@@ -5,11 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:students_follow_app/pages/questions/add-question.dart';
-import 'package:students_follow_app/pages/questions/all-questions.dart';
-import 'package:students_follow_app/pages/questions/question-enum.dart';
-import 'package:students_follow_app/pages/questions/your-questions.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/pages/questions/add-question.dart';
+import 'package:Tudora/pages/questions/all-questions.dart';
+import 'package:Tudora/pages/questions/question-enum.dart';
+import 'package:Tudora/pages/questions/your-questions.dart';
+import 'package:Tudora/services/auth.dart';
 import 'package:uuid/uuid.dart';
 
 class AddNewQuestion extends StatefulWidget {
