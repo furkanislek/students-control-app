@@ -51,13 +51,10 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
 
   Future<void> fetchUsers() async {
     List<User> users = [];
-    // Firestore'dan 'users' koleksiyonunu çekiyoruz.
     QuerySnapshot querySnapshot =
         await FirebaseFirestore.instance.collection('users').get();
 
-    // Her bir dökümanı gezip gerekli verileri işliyoruz.
     querySnapshot.docs.forEach((doc) {
-      // `userPoints` altındaki `userPoint` değerlerini toplamak için
       List<dynamic> userPoints = doc['userPoint'] ?? [];
       dynamic totalPoints = userPoints.fold(0.0, (dynamic sum, dynamic point) {
         return sum + (point['userPoint'] ?? 0);
@@ -72,13 +69,11 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
       ));
     });
 
-    // Puanlara göre sıralıyoruz (yüksekten düşüğe)
     users.sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
 
-    // İlk 3 kullanıcıyı ayırıyoruz
     setState(() {
-      topUsers = users.take(3).toList(); // İlk 3 kullanıcı
-      remainingUsers = users.skip(3).toList(); // Geri kalanlar
+      topUsers = users.take(3).toList();
+      remainingUsers = users.skip(3).toList();
     });
   }
 
@@ -102,7 +97,6 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               height: height,
               child: Column(
                 children: [
-                  // Üst kısım: İlk üç kullanıcı
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
@@ -117,7 +111,6 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        // 2. sıradaki kullanıcı
                         Padding(
                           padding: EdgeInsets.only(top: height * 0.07),
                           child: Column(
@@ -139,7 +132,6 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             ],
                           ),
                         ),
-                        // 1. sıradaki kullanıcı
                         Padding(
                           padding: const EdgeInsets.only(top: 12.0),
                           child: Column(
@@ -161,7 +153,6 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                             ],
                           ),
                         ),
-                        // 3. sıradaki kullanıcı
                         Padding(
                           padding: EdgeInsets.only(top: height * 0.1),
                           child: Column(
@@ -234,7 +225,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                   children: [
                                     Text(
                                       (index + 4)
-                                          .toString(), // 4. sıradan başlat
+                                          .toString(),
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
@@ -243,12 +234,12 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
                                     const SizedBox(width: 15),
                                     Container(
                                       padding: const EdgeInsets.all(
-                                          2), // Kenarlık için alan
+                                          2), 
                                       decoration: const BoxDecoration(
                                         color: Color.fromARGB(
-                                            255, 82, 73, 0), // Kenarlık rengi
+                                            255, 82, 73, 0),
                                         shape: BoxShape
-                                            .circle, // Yuvarlak kenarlık
+                                            .circle, 
                                       ),
                                       child: CircleAvatar(
                                         backgroundImage: MemoryImage(
@@ -308,10 +299,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
               ),
             ),
           )
-        : Scaffold(); // Eğer topUsers boşsa boş bir Scaffold döndürür
+        : Scaffold();
   }
 
-  // Top kullanıcılar için avatar ve puan gösterimi
   Widget _buildTopUserContainer(
       BuildContext context, double width, double height, User user,
       {required Color color, required dynamic icons}) {

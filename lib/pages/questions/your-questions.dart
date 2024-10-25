@@ -98,7 +98,7 @@ class _YourQuestionsState extends State<YourQuestions> {
                               )
                             : const SizedBox(
                                 height: 100,
-                                child: Placeholder()), // Placeholder
+                                child: Placeholder()), 
 
                         const SizedBox(height: 8),
 

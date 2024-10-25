@@ -1,6 +1,5 @@
 // ignore: file_names
 String getCategoryString(int categoryId) {
-  // Map the category ID to the corresponding category name
   switch (categoryId) {
     case 1:
       return 'Matematik';

@@ -1,4 +1,3 @@
-// Define an enum for the categories
 enum QuestionCategory  {
   Matematik(1),
   Fizik(2),
