@@ -1,12 +1,12 @@
+import 'package:Tudora/pages/auth/register.dart';
+import 'package:Tudora/pages/home/informationForm.dart';
+import 'package:Tudora/pages/home/menu-home.dart';
+import 'package:Tudora/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:students_follow_app/pages/auth/register.dart';
-import 'package:students_follow_app/pages/home/informationForm.dart';
-import 'package:students_follow_app/pages/home/menu-home.dart';
-import 'package:students_follow_app/services/auth.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});

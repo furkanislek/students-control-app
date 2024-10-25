@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/Profile/profile.dart';
-import 'package:students_follow_app/services/auth.dart';
-import 'package:students_follow_app/utils/category-utils.dart';
+import 'package:Tudora/pages/Profile/profile.dart';
+import 'package:Tudora/services/auth.dart';
+import 'package:Tudora/utils/category-utils.dart';
 
 class QuestionDetail extends StatefulWidget {
   final Map<String, dynamic> question;
@@ -100,7 +100,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
           "userPoint": FieldValue.arrayUnion([
             {
               'dateTime': DateTime.now().millisecondsSinceEpoch,
-              "userPoint": 10, // Örnek puan değeri
+              "userPoint": 10, 
               "questionId": widget.question["questionId"]
             }
           ])
@@ -327,7 +327,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                           width: double.infinity,
                         )
                       : const SizedBox(
-                          height: 100, child: Placeholder()), // Placeholder
+                          height: 100, child: Placeholder()),
 
                   const SizedBox(height: 8),
                   Padding(
@@ -430,13 +430,13 @@ class _QuestionDetailState extends State<QuestionDetail> {
                         color: isCorrectAnswer
                             ? Colors.green[50]
                             : Colors
-                                .white, // Doğru cevapsa arka planı yeşil yap
+                                .white,
                         shape: RoundedRectangleBorder(
                           side: BorderSide(
                             color: isCorrectAnswer
                                 ? Colors.green
                                 : Colors
-                                    .transparent, // Doğru cevapsa kenarlığı yeşil yap
+                                    .transparent, 
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(10),
@@ -480,7 +480,7 @@ class _QuestionDetailState extends State<QuestionDetail> {
                                           Icons.check_box,
                                           color: isCorrectAnswer
                                               ? const Color.fromARGB(255, 2,
-                                                  153, 39) // Gold color if true
+                                                  153, 39) 
                                               : const Color.fromARGB(
                                                   255, 219, 217, 217),
                                         ),

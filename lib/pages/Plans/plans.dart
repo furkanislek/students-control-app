@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/home/menu-home.dart';
+import 'package:Tudora/pages/home/menu-home.dart';
 import 'package:uuid/uuid.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
@@ -108,6 +108,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       'taskId': uuid.v4(),
       'taskPoint': 10,
       'isCompleted': false,
+      'isActive': true,
     }).then((value) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Hedef başarıyla kaydedildi')),
@@ -224,7 +225,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   ),
                 ),
               ),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -277,7 +277,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   ),
                 ],
               ),
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -305,14 +304,11 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                           child: ChoiceChip(
                             showCheckmark: false,
                             avatarBorder: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  0), 
-                              side:
-                                  BorderSide.none, 
+                              borderRadius: BorderRadius.circular(0),
+                              side: BorderSide.none,
                             ),
-                            avatar: Icon(_categories[index][0]), 
-                            label: Text(
-                                _categories[index][1]), 
+                            avatar: Icon(_categories[index][0]),
+                            label: Text(_categories[index][1]),
                             labelStyle: TextStyle(
                               color: _selectedCategory == _categories[index][1]
                                   ? Colors.white
@@ -334,7 +330,6 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

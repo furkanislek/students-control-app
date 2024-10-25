@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:students_follow_app/pages/Leaderboard/leaderboard.dart';
-import 'package:students_follow_app/pages/auth/login_register_page.dart';
-import 'package:students_follow_app/pages/home/home.dart';
-import 'package:students_follow_app/pages/questions/add_new_question.dart';
-import 'package:students_follow_app/pages/questions/quiz/quiz-page.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/pages/Leaderboard/leaderboard.dart';
+import 'package:Tudora/pages/auth/login_register_page.dart';
+import 'package:Tudora/pages/home/home.dart';
+import 'package:Tudora/pages/questions/add_new_question.dart';
+import 'package:Tudora/pages/questions/quiz/quiz-page.dart';
+import 'package:Tudora/services/auth.dart';
 
 class Menu extends StatefulWidget {
   const Menu({super.key});

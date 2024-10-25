@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/services/auth.dart';
 
 class FollowersPage extends StatefulWidget {
   final String userID;

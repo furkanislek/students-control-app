@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/questions/question-detail.dart';
+import 'package:Tudora/pages/questions/question-detail.dart';
 
 class AllQuestions extends StatefulWidget {
   const AllQuestions({super.key});
@@ -78,22 +78,20 @@ class _AllQuestionsState extends State<AllQuestions> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        // Görüntü var mı kontrolü
                         question['image'] != null
                             ? Image.memory(
                                 Base64Decoder().convert(question['image']),
                                 fit: BoxFit.fill,
-                                height: 120, // Görüntünün yüksekliği
+                                height: 120, 
                                 width: double.infinity,
                               )
                             : const SizedBox(
                                 height: 120,
                                 child:
-                                    Placeholder()), // Placeholder (görsel yoksa)
+                                    Placeholder()), 
 
                         const SizedBox(height: 8),
 
-                        // Başlık
                         Text(
                           question['title'] ?? 'No Title',
                           style: const TextStyle(
@@ -104,7 +102,6 @@ class _AllQuestionsState extends State<AllQuestions> {
 
                         const SizedBox(height: 4),
 
-                        // Kategori ve tarih bilgisi
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [

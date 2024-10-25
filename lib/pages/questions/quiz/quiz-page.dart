@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_gradient_app_bar/flutter_gradient_app_bar.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/services/auth.dart';
 
 class QuizPage extends StatefulWidget {
   @override

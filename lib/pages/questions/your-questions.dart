@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:students_follow_app/pages/questions/question-detail.dart';
-import 'package:students_follow_app/utils/category-utils.dart';
+import 'package:Tudora/pages/questions/question-detail.dart';
+import 'package:Tudora/utils/category-utils.dart';
 
 class YourQuestions extends StatefulWidget {
   const YourQuestions({super.key});
@@ -98,7 +98,7 @@ class _YourQuestionsState extends State<YourQuestions> {
                               )
                             : const SizedBox(
                                 height: 100,
-                                child: Placeholder()), // Placeholder
+                                child: Placeholder()), 
 
                         const SizedBox(height: 8),
 

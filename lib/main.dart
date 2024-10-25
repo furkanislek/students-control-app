@@ -4,12 +4,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:students_follow_app/notification/firebase_api.dart';
-import 'package:students_follow_app/pages/auth/login_register_page.dart';
-import 'package:students_follow_app/pages/home/informationForm.dart';
-import 'package:students_follow_app/pages/home/menu-home.dart';
+import 'package:Tudora/notification/firebase_api.dart';
+import 'package:Tudora/pages/auth/login_register_page.dart';
+import 'package:Tudora/pages/home/informationForm.dart';
+import 'package:Tudora/pages/home/menu-home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/services/auth.dart';
 import 'firebase_options.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
     }
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Tudora',
       navigatorKey: navigatorKey,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

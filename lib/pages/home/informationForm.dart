@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:students_follow_app/pages/home/home.dart';
+import 'package:Tudora/pages/home/home.dart';
 import 'package:uuid/uuid.dart';
 
 class InformationForm extends StatefulWidget {

@@ -1,4 +1,4 @@
-# students_follow_app
+# Tudora
 
 A new Flutter project.
 

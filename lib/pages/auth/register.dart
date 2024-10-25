@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:students_follow_app/pages/auth/login.dart';
-import 'package:students_follow_app/services/auth.dart';
+import 'package:Tudora/pages/auth/login.dart';
+import 'package:Tudora/services/auth.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
