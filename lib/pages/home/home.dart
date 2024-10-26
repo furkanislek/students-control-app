@@ -94,6 +94,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     final unFinishedLength = _activeTasks.length + _upcomingTasks.length;
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFFF2F2F2),
         title: const Text('Görevler'),
         actions: [

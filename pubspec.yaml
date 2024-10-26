@@ -57,6 +57,8 @@ dependencies:
   confetti: ^0.8.0
   flutter_timer_countdown: ^1.0.7
   flutter_colorpicker: ^1.1.0
+  vibration: ^2.0.1
+
 
 dev_dependencies:
   flutter_test:

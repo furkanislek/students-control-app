@@ -35,6 +35,7 @@ class _MenuHomeState extends State<MenuHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       body: _pages[_pageIndex],
       bottomNavigationBar: CurvedNavigationBar(
         animationDuration: const Duration(milliseconds: 500),
@@ -54,6 +55,7 @@ class _MenuHomeState extends State<MenuHome> {
             _pageIndex = index;
           });
         },
+
       ),
     );
   }

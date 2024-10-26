@@ -1,9 +1,12 @@
 import 'package:Tudora/pages/home/menu-home.dart';
 import 'package:Tudora/services/auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_timer_countdown/flutter_timer_countdown.dart';
+import 'package:vibration/vibration.dart';
 
 class Timer extends StatefulWidget {
   final Color color;
@@ -16,6 +19,20 @@ class Timer extends StatefulWidget {
 }
 
 class _TimerState extends State<Timer> {
+  late ConfettiController _confettiController;
+  @override
+  void initState() {
+    super.initState();
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
+  }
+
   Future<void> updateUserPoints(int points) async {
     var docRef = await FirebaseFirestore.instance
         .collection("users")
@@ -35,7 +52,21 @@ class _TimerState extends State<Timer> {
           }
         ])
       });
+
+      _confettiController.play();
+      vibrate();
+      Future.delayed(const Duration(seconds: 10), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => MenuHome()),
+          (route) => false,
+        );
+      });
     }
+  }
+
+  static Future<void> vibrate() async {
+    await SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
   }
 
   @override
@@ -81,27 +112,55 @@ class _TimerState extends State<Timer> {
           ),
         ],
       ),
-      body: Center(
-        child: CupertinoPageScaffold(
-          backgroundColor: widget.color,
-          child: TimerCountdown(
-            colonsTextStyle: const TextStyle(fontSize: 72),
-            format: CountDownTimerFormat.minutesSeconds,
-            endTime: DateTime.now().add(
-              Duration(
-                minutes: widget.timer,
+      body: Stack(children: [
+        Center(
+          child: CupertinoPageScaffold(
+            backgroundColor: widget.color,
+            child: TimerCountdown(
+              colonsTextStyle: const TextStyle(fontSize: 72),
+              format: CountDownTimerFormat.minutesSeconds,
+              minutesDescription: "Dakika",
+              secondsDescription: "Saniye",
+              timeTextStyle: const TextStyle(fontSize: 40),
+              descriptionTextStyle: const TextStyle(fontSize: 40),
+              endTime: DateTime.now().add(
+                Duration(
+                  minutes: widget.timer,
+                ),
               ),
+              onEnd: () async {
+                if (widget.timer > 60) {
+                  await updateUserPoints(
+                      ((((widget.timer) / 30) * 25) - 25) as int);
+                } else {
+                  await updateUserPoints(25);
+                }
+                if (await Vibration.hasVibrator() ?? false) {
+                  Vibration.vibrate(
+                      duration: 1500); 
+                }
+                HapticFeedback.vibrate();
+              },
             ),
-            onEnd: () {
-              if (widget.timer > 60) {
-                updateUserPoints((((widget.timer) / 60) * 100) as int);
-              } else {
-                updateUserPoints(100);
-              }
-            },
           ),
         ),
-      ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: ConfettiWidget(
+            confettiController: _confettiController,
+            blastDirectionality: BlastDirectionality.explosive,
+            shouldLoop: false,
+            numberOfParticles: 50,
+            colors: const [
+              Colors.green,
+              Colors.blue,
+              Colors.pink,
+              Colors.orange,
+              Colors.purple
+            ],
+          ),
+        )
+      ]),
     );
   }
 }

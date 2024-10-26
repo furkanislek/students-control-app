@@ -1,8 +1,8 @@
+import 'package:Tudora/components/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:Tudora/notification/firebase_api.dart';
 import 'package:Tudora/pages/auth/login_register_page.dart';
@@ -108,22 +108,6 @@ class _MyAppState extends State<MyApp> {
       home: user == null
           ? const LoginRegisterPage()
           : (checkNick ? const MenuHome() : const InformationForm()),
-    );
-  }
-}
-
-const spinkit = SpinKitPouringHourGlassRefined(
-  color: Color(0xFF8256DF),
-  size: 120.0,
-);
-
-class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(child: spinkit),
     );
   }
 }

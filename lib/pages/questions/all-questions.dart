@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Tudora/components/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -35,7 +36,7 @@ class _AllQuestionsState extends State<AllQuestions> {
         future: _fetchAllQuestions(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingScreen());
           }
 
           if (snapshot.hasError) {

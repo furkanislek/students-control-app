@@ -97,7 +97,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       _endTime?.minute ?? 0,
     );
     if (endDateTime.isBefore(startDateTime)) {
-      endDateTime = endDateTime.add(const Duration(days: 1)); // Add one day
+      endDateTime = endDateTime.add(const Duration(days: 1));
     }
 
     DateTime endDateTimeUtc = endDateTime.toUtc().subtract(Duration(hours: 3));

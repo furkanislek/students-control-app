@@ -1,21 +1,21 @@
 // ignore: file_names
 String getCategoryString(int categoryId) {
   switch (categoryId) {
-    case 1:
+    case 0:
       return 'Matematik';
-    case 2:
+    case 1:
       return 'Fizik';
-    case 3:
+    case 2:
       return 'Kimya';
-    case 4:
+    case 3:
       return 'Türkçe';
-    case 5:
+    case 4:
       return 'Edebiyat';
-    case 6:
+    case 5:
       return 'Geometri';
-    case 7:
+    case 6:
       return 'Biyoloji';
-    case 8:
+    case 7:
       return 'Sosyal Bilgiler';
     default:
       return 'Bilinmeyen Kategori';

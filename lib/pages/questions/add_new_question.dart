@@ -1,3 +1,4 @@
+import 'package:Tudora/pages/home/menu-home.dart';
 import 'package:flutter/material.dart';
 import 'package:Tudora/pages/questions/add-question.dart';
 import 'package:Tudora/pages/questions/all-questions.dart';
@@ -25,6 +26,21 @@ class _AddNewQuestionState extends State<AddNewQuestion> {
         appBar: AppBar(
           backgroundColor: const Color(0xFFF2F2F2),
           toolbarHeight: 60,
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MenuHome(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
           title: const Text(
             "Sorular",
             style: TextStyle(

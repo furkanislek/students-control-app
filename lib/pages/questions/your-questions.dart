@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'package:Tudora/components/loading.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:Tudora/pages/questions/question-detail.dart';
 import 'package:Tudora/utils/category-utils.dart';
+import 'package:intl/intl.dart';
 
 class YourQuestions extends StatefulWidget {
   const YourQuestions({super.key});
@@ -42,14 +44,13 @@ class _YourQuestionsState extends State<YourQuestions> {
   Widget build(BuildContext context) {
     double height = MediaQuery.sizeOf(context).height;
     double width = MediaQuery.sizeOf(context).width;
-
     return Scaffold(
       backgroundColor: const Color(0xfff2f2f2),
       body: FutureBuilder<List<Map<String, dynamic>>?>(
         future: _fetchUserQuestions(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingScreen());
           }
 
           if (snapshot.hasError) {
@@ -73,6 +74,7 @@ class _YourQuestionsState extends State<YourQuestions> {
             itemCount: questions.length,
             itemBuilder: (context, index) {
               final question = questions[index];
+              print(" question['timestamp'] ${question['timestamp']}");
 
               return GestureDetector(
                 onTap: () {
@@ -126,11 +128,13 @@ class _YourQuestionsState extends State<YourQuestions> {
                                   fontSize: 12, color: Colors.grey),
                             ),
                             Text(
-                              question['timestamp'] != null
-                                  ? (question['timestamp'] as Timestamp)
-                                      .toDate()
-                                      .toString()
-                                  : 'No Date',
+                              question['dateTime'] != null
+                                  ? DateFormat("d MMMM y - HH:mm", "tr_TR")
+                                      .format(
+                                          DateTime.fromMillisecondsSinceEpoch(
+                                                  question['dateTime'])
+                                              .add(const Duration(hours: 3)))
+                                  : '',
                               style: const TextStyle(
                                   fontSize: 12, color: Colors.grey),
                             ),
