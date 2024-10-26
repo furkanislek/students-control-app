@@ -34,17 +34,22 @@ class _LoginState extends State<Login> {
 
   Future<void> signIn() async {
     try {
-      await Auth().signIn(
-          email: emailController.text, password: passwordController.text);
+      await Auth()
+          .signIn(
+              email: emailController.text, password: passwordController.text)
+          .timeout(Duration(seconds: 1), onTimeout: () {
+        setState(() {
+          errorMessage = "Login attempt timed out.";
+        });
+      });
 
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        bool userExists = await checkIfUserExists(user.uid);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const LoadingScreen()),
         );
-
-        bool userExists = await checkIfUserExists(user.uid);
 
         if (mounted) {
           Navigator.pushReplacement(

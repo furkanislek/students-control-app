@@ -78,6 +78,34 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     final String uid = auth.currentUser!.uid;
     var uuid = Uuid();
 
+    if (_titleContainer.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Lütfen Görev Başlığını Giriniz.',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_selectedCategory.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Lütfen Kategori Seçiniz.',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     DateTime startDateTime = DateTime(
       _selectedDate.year,
       _selectedDate.month,
@@ -276,6 +304,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                           controller: _titleContainer,
                           textInputAction: TextInputAction.done,
                           keyboardType: TextInputType.text,
+                          maxLength: 25,
                           decoration: InputDecoration(
                             hintText: "Plan Başlığını Yazınız.",
                             hintStyle: TextStyle(

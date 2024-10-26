@@ -366,7 +366,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                           SizedBox(width: width / 51),
                           Text(task['title'],
                               style: TextStyle(
-                                  fontSize: height / 55.625,
+                                  fontSize: width / 27,
                                   fontWeight: FontWeight.bold)),
                         ],
                       ),
