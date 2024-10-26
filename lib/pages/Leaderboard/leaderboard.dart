@@ -27,7 +27,7 @@ class _LeaderboardState extends State<Leaderboard> {
             unselectedLabelColor: Color.fromARGB(255, 218, 218, 218),
             tabs: [
               Tab(
-                  text: "Arkadaşlar Arası",
+                  text: "Takip Ettiklerim",
                   icon: Icon(
                     Icons.person_pin,
                     color: Color.fromARGB(255, 255, 255, 255),

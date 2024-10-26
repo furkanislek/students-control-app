@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Tudora/pages/questions/add_new_question.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -286,6 +287,21 @@ class _QuestionDetailState extends State<QuestionDetail> {
       appBar: AppBar(
         title: Text(widget.question['title'] ?? 'Question Detail'),
         backgroundColor: const Color(0xfff2f2f2),
+        leading: Builder(
+          builder: (BuildContext context) {
+            return IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddNewQuestion(),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
       body: Container(
         color: const Color(0xfff2f2f2),
@@ -306,8 +322,9 @@ class _QuestionDetailState extends State<QuestionDetail> {
                     ),
                     Text(
                       DateFormat("d MMMM y - HH:mm", "tr_TR").format(
-                          DateTime.fromMicrosecondsSinceEpoch(
-                              widget.question['dateTime'])),
+                          DateTime.fromMillisecondsSinceEpoch(
+                                  widget.question['dateTime'])
+                              .add(const Duration(hours: 3))),
                       style:
                           const TextStyle(fontSize: 14, color: Colors.black54),
                     ),

@@ -168,6 +168,21 @@ class _QuizPageState extends State<QuizPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: GradientAppBar(
+        leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MenuHome(),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
         title: const Text('Quiz'),
         gradient: const LinearGradient(
           colors: [

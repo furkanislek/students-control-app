@@ -109,8 +109,7 @@ class Auth {
       followedUserIds = [];
       followedUserIds.add({"uid": currentUserID});
       for (var item in takipEdilenList) {
-        followedUserIds
-            .add({"uid": item["userId"]}); // Use colon to create a map
+        followedUserIds.add({"uid": item["userId"]});
       }
       return followedUserIds;
     } else {

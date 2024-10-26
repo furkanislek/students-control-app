@@ -15,6 +15,19 @@ class _SetTimerState extends State<SetTimer> {
   Color mycolor = Colors.white;
 
   void starts() {
+    if (_minuteController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Lütfen dakika giriniz.',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -67,6 +80,72 @@ class _SetTimerState extends State<SetTimer> {
                     ),
                   ],
                 ),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                              text: "Odak süresi ",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "1 saat ",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                          TextSpan(
+                              text: "için ",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "25 Puan, ",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                          TextSpan(
+                              text: "daha uzun odak sürelerinizde ",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "her 30 dakika ",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                          TextSpan(
+                              text: "için ",
+                              style: TextStyle(color: Colors.black)),
+                          TextSpan(
+                              text: "25 puan ",
+                              style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold)),
+                          TextSpan(
+                              text: "kazanacaksınız.",
+                              style: TextStyle(
+                                  color: Color.fromARGB(255, 0, 0, 0))),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: height / 45),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                    vertical: height / 74.16, horizontal: width / 34.25),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFFFFF),
+                  borderRadius: BorderRadius.circular(25.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -99,9 +178,8 @@ class _SetTimerState extends State<SetTimer> {
                         title: Text('Pick a color!'),
                         content: SingleChildScrollView(
                           child: ColorPicker(
-                            pickerColor: mycolor, //default color
+                            pickerColor: mycolor,
                             onColorChanged: (Color color) {
-                              //on color picked
                               setState(() {
                                 mycolor = color;
                               });
@@ -112,8 +190,7 @@ class _SetTimerState extends State<SetTimer> {
                           ElevatedButton(
                             child: const Text('DONE'),
                             onPressed: () {
-                              Navigator.of(context)
-                                  .pop(); //dismiss the color picker
+                              Navigator.of(context).pop();
                             },
                           ),
                         ],

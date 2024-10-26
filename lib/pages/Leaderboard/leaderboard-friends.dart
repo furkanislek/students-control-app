@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:Tudora/pages/Profile/profile.dart';
 
+import '../../components/loading.dart';
+
 class User {
   String name;
   String nickName;
@@ -44,6 +46,8 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
   List<User> topUsers = [];
   List<User> remainingUsers = [];
   dynamic test;
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -58,24 +62,18 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
 
   Future<void> fetchUsers() async {
     try {
-      // Fetch followed users
       final userFollowers = await Auth()
-          .fetchFollowedUsers(); // Remove Auth() prefix since you already are in the class
-      print("userFollowers: ${userFollowers.length}");
+          .fetchFollowedUsers(); 
 
-      // Extract followed user IDs
       List<String> followedUserIds = [];
 
       if (userFollowers is List) {
         followedUserIds = userFollowers
-            .map((user) => user['uid']) // Correctly access uid from the map
+            .map((user) => user['uid']) 
             .cast<String>()
             .toList();
       }
 
-      print("followedUserIds: $followedUserIds");
-
-      // Fetch all users from Firestore
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('users').get();
       List<User> users = [];
@@ -83,7 +81,6 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
       for (var doc in querySnapshot.docs) {
         String uid = doc["uid"] ?? "";
 
-        // Only add users that are in the followed user IDs list
         if (followedUserIds.contains(uid)) {
           List<dynamic> userPoints = doc['userPoint'] ?? [];
           dynamic totalPoints =
@@ -101,7 +98,6 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
         }
       }
 
-      // Sort users by total points in descending order
       users.sort((a, b) => b.totalPoints.compareTo(a.totalPoints));
 
       setState(() {
@@ -111,6 +107,7 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
           topUsers = users.take(3).toList();
           remainingUsers = users.skip(3).toList();
         }
+        isLoading = false;
       });
     } catch (e) {
       print("Error fetching users: $e");
@@ -121,6 +118,9 @@ class _LeaderBoardFriendsState extends State<LeaderBoardFriends> {
   Widget build(BuildContext context) {
     double width = MediaQuery.sizeOf(context).width;
     double height = MediaQuery.sizeOf(context).height;
+    if (isLoading) {
+      return const LoadingScreen();
+    }
 
     return topUsers.isNotEmpty
         ? Scaffold(

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:Tudora/pages/questions/your-questions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -145,6 +145,14 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
       SnackBar(content: Text("Soru başarıyla yüklendi.")),
     );
 
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const YourQuestions()),
+        (route) => false,
+      );
+    });
+
     setState(() {
       _base64Image = null;
       _imageFile = null;
@@ -234,7 +242,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: height / 44.5),
+              SizedBox(height: height / 90),
               _buildImageButtonOrImage(height / 5.95),
               SizedBox(height: height / 44.5),
               Column(
@@ -251,7 +259,7 @@ class _AddNewQuestionPageState extends State<AddNewQuestionPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: height / 44.5),
+                  SizedBox(height: height / 59.33),
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16.0),

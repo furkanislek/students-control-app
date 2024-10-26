@@ -1,12 +1,12 @@
-enum QuestionCategory  {
-  Matematik(1),
-  Fizik(2),
-  Kimya(3),
-  Turkce(4),
-  Edebiyat(5),
-  Geometri(6),
-  Biyoloji(7),
-  SosyalBilgiler(8);
+enum QuestionCategory {
+  Matematik(0),
+  Fizik(1),
+  Kimya(2),
+  Turkce(3),
+  Edebiyat(4),
+  Geometri(5),
+  Biyoloji(6),
+  SosyalBilgiler(7);
 
   final int id;
   const QuestionCategory(this.id);

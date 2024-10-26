@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:Tudora/pages/Profile/profile.dart';
 
+import '../../components/loading.dart';
+
 class User {
   String name;
   String nickName;
@@ -42,6 +44,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   List<User> userList = [];
   List<User> topUsers = [];
   List<User> remainingUsers = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -74,6 +77,7 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
     setState(() {
       topUsers = users.take(3).toList();
       remainingUsers = users.skip(3).toList();
+      isLoading = false;
     });
   }
 
@@ -81,6 +85,9 @@ class _LeaderboardPageState extends State<LeaderboardPage> {
   Widget build(BuildContext context) {
     double width = MediaQuery.sizeOf(context).width;
     double height = MediaQuery.sizeOf(context).height;
+    if (isLoading) {
+      return const LoadingScreen();
+    }
 
     return topUsers.isNotEmpty
         ? Scaffold(

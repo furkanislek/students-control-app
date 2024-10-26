@@ -1,3 +1,4 @@
+import 'package:Tudora/components/loading.dart';
 import 'package:Tudora/pages/auth/register.dart';
 import 'package:Tudora/pages/home/informationForm.dart';
 import 'package:Tudora/pages/home/menu-home.dart';
@@ -38,20 +39,21 @@ class _LoginState extends State<Login> {
 
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const LoadingScreen()),
+        );
+
         bool userExists = await checkIfUserExists(user.uid);
 
-        if (userExists) {
-          if (mounted) {
-            Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => const MenuHome()));
-          }
-        } else {
-          if (mounted) {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const InformationForm()));
-          }
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  userExists ? const MenuHome() : const InformationForm(),
+            ),
+          );
         }
       }
     } on FirebaseAuthException catch (e) {

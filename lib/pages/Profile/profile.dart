@@ -258,11 +258,12 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: const Color(0xFFF2F2F2),
         title: (widget.userID == Auth().currentUser!.uid)
             ? const Text("Profil Bilgilerin")
             : const Text("Profil Bilgileri"),
-        actions: [
+        leading: 
           IconButton(
             onPressed: () {
               if (Navigator.canPop(context)) {
@@ -272,9 +273,9 @@ class _ProfileState extends State<Profile> {
                     MaterialPageRoute(builder: (context) => const MenuHome()));
               }
             },
-            icon: Icon(Icons.first_page),
+            icon: const Icon(Icons.arrow_back),
           ),
-        ],
+        
       ),
       body: RefreshIndicator(
         onRefresh: fetchUserInfo,
